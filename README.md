@@ -80,7 +80,7 @@ For instance, a call to an operation like `getUser(id)` could:
 - **raise an error** when the id doesn't exist in the database or if the connection is not available,
 - **failed unexpectingly** if the server run out of memory during the operation.
 
-To achieve this, the library proposes the following types:
+To achieve this, the library proposes the following result types:
 
 - `SuccessResult<Data>` - represents the successful result of an operation
 - `FailureResult<Error>` - represents the error raised by an operation

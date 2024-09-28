@@ -1,7 +1,8 @@
 {
   "name": "chain-of-actions",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "author": "Francois Karman",
+  "type": "module",
   "license": "MIT",
   "description": "Railway error management implementation in Typescript",
   "keywords": [
