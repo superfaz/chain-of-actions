@@ -1,6 +1,6 @@
 {
   "name": "chain-of-actions",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "author": "Francois Karman",
   "license": "MIT",
   "description": "Railway error management implementation in Typescript",
@@ -21,6 +21,7 @@
     "/dist"
   ],
   "scripts": {
+    "prebuild": "rimraf dist/",
     "build": "tsc",
     "publish": "tsc && pnpm publish",
     "lint": "prettier -w . && eslint .",
@@ -35,6 +36,7 @@
     "@vitest/coverage-v8": "^2.1.1",
     "eslint": "^9.11.1",
     "prettier": "^3.3.3",
+    "rimraf": "^6.0.1",
     "typescript-eslint": "^8.7.0",
     "vitest": "^2.1.1"
   }
