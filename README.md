@@ -16,7 +16,7 @@ Can be replaced by:
 
 ```typescript
 async function getUser(
-  id: number
+  id: number,
 ): PromisedResult<User, DatabaseError | MissingDataError> {
   /* */
 }
@@ -31,7 +31,7 @@ To code our method, we can use the two helpers from the `Block` class:
 
 ```typescript
 async function getUser(
-  id: number
+  id: number,
 ): PromisedResult<User, DatabaseError | MissingDataError> {
   try {
     const user = await database.get("User", id);

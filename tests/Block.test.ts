@@ -17,7 +17,7 @@ describe("Block", () => {
 
   test(".fail()", async () => {
     const actual: PromisedResult<never, TestError> = Block.fail(
-      new TestError()
+      new TestError(),
     );
 
     expect(await actual).toEqual({
