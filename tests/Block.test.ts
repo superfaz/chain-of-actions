@@ -3,8 +3,8 @@ import { Block } from "../src/Block";
 import { PromisedResult } from "../src/Result";
 
 class TestError extends Error {
-  constructor() {
-    super("Test error");
+  constructor(message?: string) {
+    super(message ?? "error");
   }
 }
 
@@ -22,7 +22,30 @@ describe("Block", () => {
 
     expect(await actual).toEqual({
       success: false,
-      error: new TestError(),
+      error: new TestError("error"),
+    });
+  });
+
+  test("convert() success", async () => {
+    const actual = Block.convert({
+      try: () => Promise.resolve("result"),
+      catch: () => new TestError(),
+    });
+
+    expect(await actual).toEqual({ success: true, data: "result" });
+  });
+
+  test("convert() fail", async () => {
+    const actual = Block.convert({
+      try: async () => {
+        throw new TestError();
+      },
+      catch: (e) => (e instanceof Error ? e : new TestError()),
+    });
+
+    expect(await actual).toEqual({
+      success: false,
+      error: new TestError("error"),
     });
   });
 });

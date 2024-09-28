@@ -43,3 +43,20 @@ async function getUser(
   }
 }
 ```
+
+or use can use `Block.convert()` to simplify the wrapping of existing code:
+
+```typescript
+async function getUser(
+  id: number,
+): PromisedResult<User, DatabaseError | MissingDataError> {
+  return Block.convert({
+    try: () => {
+      const user = await database.get("User", id);
+      return user
+        ? Block.succeed(user)
+        : Block.fail(new MissingDataError("User", id));
+      }},
+    catch: (e) => new DatabaseError(e));
+}
+```
