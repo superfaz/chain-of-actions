@@ -1,10 +1,22 @@
-## Objectives
+## Objective
 
 This project aims to provide a typed error management for typescript code.
 
-## Basic usage
+## The problem
 
-A method like this one:
+Typescript error management is based on the `try`/`catch` statements and this approach doesn't provide a strong-type management for error handling.
+
+```ts
+try {
+  const user = await getUser("id");
+} catch (error: unknown) {
+  // error can be here of any type
+}
+```
+
+## Quick Start
+
+A method like:
 
 ```typescript
 async function getUser(id: number): Promise<User> {
@@ -27,33 +39,14 @@ Calling this method will return two possible results:
 - `{success: true, data: {...}}` where `data` will be a **User** instance
 - `{success: false, error: {...}}` where `error` will be a **DatabaseError | MissingDataError** instance.
 
-To code our method, we can use the two helpers from the `Block` class:
-
-```typescript
-async function getUser(
-  id: number,
-): PromisedResult<User, DatabaseError | MissingDataError> {
-  try {
-    const user = await database.get("User", id);
-    return user
-      ? Block.succeed(user)
-      : Block.fail(new MissingDataError("User", id));
-  } catch (e) {
-    return Block.fail(new DatabaseError(e));
-  }
-}
-```
-
-The library provides helper classes to chain those actions and simplifies the code of the method.
-Here is the same implementation, leveraging `Block.convert()` and `Chain.start()`:
+To implement this method, we can use a few helpers from the `Block` and `Chain` class:
 
 ```typescript
 async function getUser(
   id: number,
 ): PromisedResult<User, DatabaseError | MissingDataError> {
   return Chain.start()
-    .addData(id)
-    .onSuccess((id) =>
+    .add(() =>
       Block.convert({
         try: () => database.get("User", id),
         catch: (e) => new DatabaseError(e),
@@ -65,9 +58,31 @@ async function getUser(
 }
 ```
 
-- `Chain.start()`
-  starts a chain of actions
-- `.addData(id)`
-  adds a new data block (would have been equivalent to `Chain.start(id)`)
-- `.onSuccess(action)`
-  adds a new action block that will execute if the previous block succeed
+| Code                 | Explanation                                                               |
+| -------------------- | ------------------------------------------------------------------------- |
+| `Chain.start()`      | starts a chain of actions with a specific data                            |
+| `.add(action)`       | adds a new node to the chain                                              |
+| `.onSuccess(action)` | adds a new node that will execute its action if the previous node succeed |
+| `Block.succeed()`    | Create a successful response                                              |
+| `Block.fail()`       | Create a failed response                                                  |
+
+## Architecture
+
+This library is based on the [Railway design pattern](https://blog.logrocket.com/what-is-railway-oriented-programming/).
+
+Railway Oriented Programming is based on the metaphor of a railway track, where operations can either **succeed** (the "right track") or **fail** (the "wrong track"). The idea is to structure the code in such a way that successful operations continue down one path, while failures are handled separately, allowing for a clean separation of concerns.
+
+In this library, we consider that three tracks should exist as our operations can either **succeed** (the "right track"), **raise an error** (the "error track") or endure an **unexpected failure** (the "failure track").
+
+For instance, a call to an operation like `getUser(id)` could:
+
+- **succeed** and return a `User` instance,
+- **raise an error** when the id doesn't exist in the database or if the connection is not available,
+- **failed unexpectingly** if the server run out of memory during the operation.
+
+To achieve this, the library proposes the following types:
+
+- `SuccessResult<Data>` - represents the successful result of an operation
+- `FailureResult<Error>` - represents the error raised by an operation
+- `Result<Data, Error>` - the union of `SuccessResult` and `FailureResult`
+- `PromisedResult<Data, Error>` - a `Promise` returning a `Result`
