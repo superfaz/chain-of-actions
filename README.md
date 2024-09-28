@@ -44,19 +44,30 @@ async function getUser(
 }
 ```
 
-or use can use `Block.convert()` to simplify the wrapping of existing code:
+The library provides helper classes to chain those actions and simplifies the code of the method.
+Here is the same implementation, leveraging `Block.convert()` and `Chain.start()`:
 
 ```typescript
 async function getUser(
   id: number,
 ): PromisedResult<User, DatabaseError | MissingDataError> {
-  return Block.convert({
-    try: () => {
-      const user = await database.get("User", id);
-      return user
-        ? Block.succeed(user)
-        : Block.fail(new MissingDataError("User", id));
-      }},
-    catch: (e) => new DatabaseError(e));
+  return Chain.start()
+    .addData(id)
+    .onSuccess((id) =>
+      Block.convert({
+        try: () => database.get("User", id),
+        catch: (e) => new DatabaseError(e),
+      }),
+    )
+    .onSuccess((user) =>
+      user ? Block.succeed(user) : Block.fail(new MissingDataError("User", id)),
+    );
 }
 ```
+
+- `Chain.start()`
+  starts a chain of actions
+- `.addData(id)`
+  adds a new data block (would have been equivalent to `Chain.start(id)`)
+- `.onSuccess(action)`
+  adds a new action block that will execute if the previous block succeed
