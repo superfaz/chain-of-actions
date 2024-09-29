@@ -18,7 +18,7 @@ jobs:
           node-version: 22
           cache: "pnpm"
       - run: pnpm install
-      - run: pnpm lint
+      - run: pnpm run lint
 
   build:
     runs-on: ubuntu-latest
@@ -32,7 +32,7 @@ jobs:
           node-version: 22
           cache: "pnpm"
       - run: pnpm install
-      - run: pnpm build
+      - run: pnpm run build
 
   test:
     runs-on: ubuntu-latest
@@ -46,7 +46,7 @@ jobs:
           node-version: 22
           cache: "pnpm"
       - run: pnpm install
-      - run: pnpm test
+      - run: pnpm run test
 
   publish-npm:
     needs:
@@ -65,6 +65,6 @@ jobs:
           cache: "pnpm"
           registry-url: https://registry.npmjs.org/
       - run: pnpm install
-      - run: pnpm publish
+      - run: pnpm run publish
         env:
           NODE_AUTH_TOKEN: ${{secrets.NPM_TOKEN}}
