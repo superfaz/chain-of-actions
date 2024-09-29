@@ -38,7 +38,7 @@ describe("Block", () => {
 
     test("fail", async () => {
       const actual = Block.convert({
-        try: async () => {
+        try: () => {
           throw new TestError();
         },
         catch: (e) => (e instanceof Error ? e : new TestError()),

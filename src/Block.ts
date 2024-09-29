@@ -1,12 +1,12 @@
 import { PromisedResult } from "./Result";
 
 export class Block {
-  static async succeed<Data>(result: Data): PromisedResult<Data, never> {
-    return { success: true, data: result };
+  static succeed<Data>(result: Data): PromisedResult<Data, never> {
+    return Promise.resolve({ success: true, data: result });
   }
 
-  static async fail<Err extends Error>(error: Err): PromisedResult<never, Err> {
-    return { success: false, error };
+  static fail<Err extends Error>(error: Err): PromisedResult<never, Err> {
+    return Promise.resolve({ success: false, error });
   }
 
   static async convert<Data, Err extends Error>(pair: {
