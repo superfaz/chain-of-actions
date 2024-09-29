@@ -6,7 +6,7 @@ This project aims to provide a typed error management for typescript code.
 
 Typescript error management is based on the `try`/`catch` statements and this approach doesn't provide a strong-type management for error handling.
 
-```ts
+```typescript
 try {
   const user = await getUser("id");
 } catch (error: unknown) {
@@ -36,8 +36,8 @@ async function getUser(
 
 Calling this method will return two possible results:
 
-- `{success: true, data: {...}}` where `data` will be a **User** instance
-- `{success: false, error: {...}}` where `error` will be a **DatabaseError | MissingDataError** instance.
+- `{success: true, data: {...}}` - A success result, where `data` will be a **User** instance
+- `{success: false, error: {...}}` - a failed result, where `error` will be a **DatabaseError | MissingDataError** instance.
 
 To implement this method, we can use a few helpers from the `Block` and `Chain` class:
 
@@ -66,6 +66,9 @@ async function getUser(
 | `Block.succeed()`    | Create a successful response                                              |
 | `Block.fail()`       | Create a failed response                                                  |
 
+> [!NOTE]
+> This example can still be improved: the current implementation uses a `database` object : Where is it initialized? How are the error managed for it?
+
 ## Architecture
 
 This library is based on the [Railway design pattern](https://blog.logrocket.com/what-is-railway-oriented-programming/).
@@ -86,3 +89,5 @@ To achieve this, the library proposes the following result types:
 - `FailureResult<Error>` - represents the error raised by an operation
 - `Result<Data, Error>` - the union of `SuccessResult` and `FailureResult`
 - `PromisedResult<Data, Error>` - a `Promise` returning a `Result`
+
+All those types don't contain methods and remain data type that can be serialized (to be usable as part of RPC flow for instance).
