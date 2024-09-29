@@ -33,6 +33,11 @@ jobs:
           cache: "pnpm"
       - run: pnpm install
       - run: pnpm run build
+      - uses: actions/upload-artifact@v4
+        with:
+          name: build
+          retention-days: 1
+          path: dist
 
   test:
     runs-on: ubuntu-latest
@@ -64,7 +69,11 @@ jobs:
           node-version: 22
           cache: "pnpm"
           registry-url: https://registry.npmjs.org/
-      - run: pnpm install
-      - run: pnpm run publish
+      - uses: actions/download-artifact@v4
+        with:
+          name: build
+          path: dist
+      - run: ls -al
+      - run: pnpm publish
         env:
           NODE_AUTH_TOKEN: ${{secrets.NPM_TOKEN}}

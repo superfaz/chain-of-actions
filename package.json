@@ -1,6 +1,6 @@
 {
   "name": "chain-of-actions",
-  "version": "0.4.1",
+  "version": "0.4.2",
   "author": "Francois Karman",
   "type": "module",
   "license": "MIT",
@@ -24,7 +24,6 @@
   "scripts": {
     "prebuild": "rimraf dist/",
     "build": "tsc",
-    "publish": "tsc && pnpm publish",
     "lint": "prettier -w . && eslint .",
     "test": "vitest"
   },
