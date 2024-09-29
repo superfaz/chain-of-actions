@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest";
-import { Block } from "../src/Block";
+import Block from "../src/Block";
 import { Node } from "../src/Node";
 import { Result } from "../src/Result";
 

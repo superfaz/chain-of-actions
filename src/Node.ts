@@ -1,4 +1,4 @@
-import { Block } from "./Block";
+import Block from "./Block";
 import { PromisedResult, Result } from "./Result";
 
 export class Node<Data, Err extends Error = never, Context = never> {

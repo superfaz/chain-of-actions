@@ -4,7 +4,7 @@ import tseslint from "typescript-eslint";
 export default [
   { ignores: ["coverage/", "dist/"] },
   eslint.configs.recommended,
-  ...tseslint.configs.recommendedTypeChecked,
+  ...tseslint.configs.strictTypeChecked,
   {
     languageOptions: {
       parserOptions: {

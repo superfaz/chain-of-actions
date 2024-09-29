@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest";
-import { Block } from "../src/Block";
+import Block from "../src/Block";
 import { PromisedResult } from "../src/Result";
 
 class TestError extends Error {

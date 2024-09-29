@@ -2,7 +2,7 @@
  * Demonstrate how to use chain-of-actions to prepare services and execute actions.
  */
 
-import { Block } from "../src/Block";
+import Block from "../src/Block";
 import { Chain } from "../src/Chain";
 import { PromisedResult } from "../src/Result";
 

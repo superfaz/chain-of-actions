@@ -1,4 +1,4 @@
-import { Block } from "./Block";
+import Block from "./Block";
 import { PromisedResult, Result } from "./Result";
 
 interface IDelayedNode<Start, Context extends object, Data, Err extends Error> {
@@ -107,7 +107,7 @@ export class DelayedRoot<Start, Context extends object>
     start: Start,
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     context: Context,
-  ): PromisedResult<Start, never> {
+  ): PromisedResult<Start> {
     return Block.succeed(start);
   }
 }

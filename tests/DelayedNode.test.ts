@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest";
-import { Block } from "../src/Block";
+import Block from "../src/Block";
 import { Chain } from "../src/Chain";
 
 class TestError extends Error {
