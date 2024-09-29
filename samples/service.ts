@@ -3,7 +3,7 @@
  */
 
 import Block from "../src/Block";
-import { Chain } from "../src/Chain";
+import Chain from "../src/Chain";
 import { PromisedResult } from "../src/Result";
 
 /**

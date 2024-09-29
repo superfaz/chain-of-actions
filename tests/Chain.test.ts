@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest";
-import { Chain } from "../src/Chain";
+import Chain from "../src/Chain";
 import { Node } from "../src/Node";
 import { PromisedResult } from "../src/Result";
 
