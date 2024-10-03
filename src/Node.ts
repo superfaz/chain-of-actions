@@ -1,5 +1,6 @@
+import { Action, ErrorAction, DataAction } from "./Action";
 import Block from "./Block";
-import { PromisedResult, Result } from "./Result";
+import { PromisedResult } from "./Result";
 
 export class Node<Data, Err extends Error = never, Context = never> {
   constructor(
@@ -7,46 +8,43 @@ export class Node<Data, Err extends Error = never, Context = never> {
     private readonly context: Context,
   ) {}
 
-  public add<DataB, ErrB extends Error>(
-    node: (
-      result: Result<Data, Err>,
-      context: Context,
-    ) => PromisedResult<DataB, ErrB>,
-  ): Node<DataB, Err | ErrB, Context> {
+  public add<Output, OutputErr extends Error>(
+    node: Action<Data, Output, Err, OutputErr, Context>,
+  ): Node<Output, Err | OutputErr, Context> {
     return new Node(
       this.node.then((r) => node(r, this.context)),
       this.context,
     );
   }
 
-  public onSuccess<DataB, ErrB extends Error>(
-    callback: (data: Data, context: Context) => PromisedResult<DataB, ErrB>,
-  ): Node<DataB, Err | ErrB, Context> {
+  public onSuccess<Output, OutputErr extends Error>(
+    callback: DataAction<Data, Output, OutputErr, Context>,
+  ): Node<Output, Err | OutputErr, Context> {
     return this.add(
       (r) =>
         (r.success
           ? callback(r.data, this.context)
-          : Block.fail(r.error)) as PromisedResult<DataB, Err | ErrB>,
+          : Block.fail(r.error)) as PromisedResult<Output, Err | OutputErr>,
     );
   }
 
-  public onError<DataB, ErrB extends Error>(
-    callback: (error: Err, context: Context) => PromisedResult<DataB, ErrB>,
-  ): Node<DataB, Err | ErrB, Context> {
+  public onError<Output, OutputErr extends Error>(
+    callback: ErrorAction<Err, Output, OutputErr, Context>,
+  ): Node<Output, Err | OutputErr, Context> {
     return this.add(
       (r) =>
         (r.success
           ? Block.succeed(r.data)
           : callback(r.error, this.context)) as PromisedResult<
-          DataB,
-          Err | ErrB
+          Output,
+          Err | OutputErr
         >,
     );
   }
 
-  public addData<DataB, ErrB extends Error>(
-    callback: (data: Data, context: Context) => PromisedResult<DataB, ErrB>,
-  ): Node<Data & DataB, Err | ErrB, Context> {
+  public addData<Output, OutputErr extends Error>(
+    callback: DataAction<Data, Output, OutputErr, Context>,
+  ): Node<Data & Output, Err | OutputErr, Context> {
     return this.add((r) => {
       if (r.success) {
         return callback(r.data, this.context).then(
@@ -54,8 +52,8 @@ export class Node<Data, Err extends Error = never, Context = never> {
             (s.success
               ? Block.succeed({ ...r.data, ...s.data })
               : Block.fail(s.error)) as PromisedResult<
-              Data & DataB,
-              Err | ErrB
+              Data & Output,
+              Err | OutputErr
             >,
         );
       } else {

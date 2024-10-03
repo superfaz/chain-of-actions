@@ -91,3 +91,9 @@ To achieve this, the library proposes the following result types:
 - `PromisedResult<Data, Error>` - a `Promise` returning a `Result`
 
 All those types don't contain methods and remain data type that can be serialized (to be usable as part of RPC flow for instance).
+
+The notion of "Railway" is splited into 3 core concepts:
+
+- The `Action`, a function that executes a process based on a specific data and context and returns a `PromisedResult`.
+- The `Node` that encapsulates an action to provides extra methods.
+- The `Chain` that groups various nodes to provide a service.
