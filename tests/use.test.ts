@@ -1,6 +1,5 @@
 import { describe, expect, test } from "vitest";
-import Block from "../src/Block";
-import Chain from "../src/Chain";
+import { fail, start, succeed } from "../src";
 
 class TestError extends Error {
   constructor(message?: string) {
@@ -10,15 +9,15 @@ class TestError extends Error {
 
 describe("Usage", () => {
   test("Build data and executes 2 actions", async () => {
-    const data1 = Block.succeed({ a: 2 });
-    const data2 = Block.succeed({ b: 3 });
+    const data1 = succeed({ a: 2 });
+    const data2 = succeed({ b: 3 });
     const action1 = (data: { a: number; b: number }) =>
       data.b > 0
-        ? Block.succeed(data.a + data.b)
-        : Block.fail(new TestError("b is negative"));
-    const action2 = (data: number) => Block.succeed(data * 2);
+        ? succeed(data.a + data.b)
+        : fail(new TestError("b is negative"));
+    const action2 = (data: number) => succeed(data * 2);
 
-    const actual = Chain.start()
+    const actual = start()
       .addData(() => data1)
       .addData(() => data2)
       .onSuccess(action1)
@@ -36,11 +35,11 @@ describe("Usage", () => {
     const service2 = { b: 3 };
     const action1 = (data: number, context: TestContext) =>
       data > 0
-        ? Block.succeed(data + context.a + context.b)
-        : Block.fail(new TestError("negative"));
-    const action2 = (data: number) => Block.succeed(data * 2);
+        ? succeed(data + context.a + context.b)
+        : fail(new TestError("negative"));
+    const action2 = (data: number) => succeed(data * 2);
 
-    const actual = Chain.start(2)
+    const actual = start(2)
       .addContext(service1)
       .addContext(service2)
       .onSuccess(action1)
@@ -51,21 +50,21 @@ describe("Usage", () => {
   });
 
   test("Prepare 2 services and executes 2 actions", async () => {
-    const service1 = Block.succeed({ a: 2 });
-    const service2 = Block.succeed({ b: 3 });
+    const service1 = succeed({ a: 2 });
+    const service2 = succeed({ b: 3 });
     const action1 = (data: number, context: { a: number; b: number }) =>
       data > 0
-        ? Block.succeed(data + context.a + context.b)
-        : Block.fail(new TestError("negative"));
-    const action2 = (data: number) => Block.succeed(data * 2);
+        ? succeed(data + context.a + context.b)
+        : fail(new TestError("negative"));
+    const action2 = (data: number) => succeed(data * 2);
 
-    const services = await Chain.start({})
+    const services = await start({})
       .addData(() => service1)
       .addData(() => service2)
       .runAsync();
 
     if (services.success) {
-      const actual = Chain.start(2, services.data)
+      const actual = start(2, services.data)
         .onSuccess(action1)
         .onSuccess(action1)
         .onSuccess(action2);
@@ -80,15 +79,15 @@ describe("Usage", () => {
     const service2 = { b: 3 };
     const action1 = (data: number, context: { a: number; b: number }) =>
       data > 0
-        ? Block.succeed(data + context.a + context.b)
-        : Block.fail(new TestError("negative"));
-    const action2 = (data: number) => Block.succeed(data * 2);
+        ? succeed(data + context.a + context.b)
+        : fail(new TestError("negative"));
+    const action2 = (data: number) => succeed(data * 2);
 
-    const actual = Chain.start(-2)
+    const actual = start(-2)
       .addContext(service1)
       .addContext(service2)
       .onSuccess(action1)
-      .onError(() => Block.succeed(1))
+      .onError(() => succeed(1))
       .onSuccess(action1)
       .onSuccess(action2);
 
@@ -96,8 +95,8 @@ describe("Usage", () => {
   });
 
   test("error handling", async () => {
-    const actual = await Chain.start(-2)
-      .add(() => Block.fail(new Error("error")))
+    const actual = await start(-2)
+      .add(() => fail(new Error("error")))
       .runAsync();
 
     expect(actual).toEqual({ success: false, error: new Error("error") });

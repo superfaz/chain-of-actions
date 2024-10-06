@@ -2,9 +2,7 @@
  * Demonstrate how to use chain-of-actions to prepare services and execute actions.
  */
 
-import Block from "../src/Block";
-import Chain from "../src/Chain";
-import { PromisedResult } from "../src/Result";
+import { fail, prepare, PromisedResult, start, succeed } from "../src";
 
 /**
  * Mocks process.env for the sample.
@@ -33,8 +31,8 @@ class DatabaseClient {
 
   getUser(id: string): PromisedResult<User, MissingDataError> {
     return id === "alice"
-      ? Block.succeed({ id: "alice", name: "Alice" })
-      : Block.fail(new MissingDataError("User", id));
+      ? succeed({ id: "alice", name: "Alice" })
+      : fail(new MissingDataError("User", id));
   }
 }
 
@@ -88,10 +86,10 @@ function loadConfiguration(): PromisedResult<
   Configuration,
   ConfigurationMissingError
 > {
-  const config = Chain.prepare().addData(() =>
+  const config = prepare().addData(() =>
     process.env.DATABASE_URL
-      ? Block.succeed({ databaseUrl: process.env.DATABASE_URL })
-      : Block.fail(new ConfigurationMissingError("DATABASE_URL")),
+      ? succeed({ databaseUrl: process.env.DATABASE_URL })
+      : fail(new ConfigurationMissingError("DATABASE_URL")),
   );
 
   return config.runAsync(undefined, {});
@@ -101,9 +99,9 @@ function loadConfiguration(): PromisedResult<
  * Creates the context from the configuration.
  */
 function createContext(configuration: Configuration): PromisedResult<Context> {
-  const context = Chain.prepare<undefined, Configuration>().addData(
+  const context = prepare<undefined, Configuration>().addData(
     (_, configuration) =>
-      Block.succeed({
+      succeed({
         database: new DatabaseClient(configuration.databaseUrl),
       }),
   );
@@ -127,7 +125,7 @@ export async function apiLike() {
     return new HttpResponse(500);
   }
 
-  const user = await Chain.start("alice", context.data)
+  const user = await start("alice", context.data)
     .onSuccess((id, { database }) => database.getUser(id))
     .runAsync();
 
