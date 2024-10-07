@@ -1,6 +1,6 @@
 {
   "name": "chain-of-actions",
-  "version": "0.6.1",
+  "version": "0.6.2",
   "author": "Francois Karman",
   "type": "module",
   "license": "MIT",
@@ -16,7 +16,7 @@
     "type": "git",
     "url": "git+https://github.com/superfaz/chain-of-actions.git"
   },
-  "main": "dist/index.js",
+  "exports": "./dist/index.js",
   "types": "dist/index.d.ts",
   "files": [
     "/dist"
