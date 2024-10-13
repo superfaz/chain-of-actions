@@ -1,7 +1,7 @@
 import { PromisedResult } from "./Result";
 
 export function succeed<Data>(result: Data): PromisedResult<Data> {
-  return Promise.resolve({ success: true, data: result });
+  return Promise.resolve({ success: true, value: result });
 }
 
 export function fail<Err extends Error>(

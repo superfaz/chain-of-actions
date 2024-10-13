@@ -14,7 +14,7 @@ describe("Node", () => {
     test("success", async () => {
       const start = Block.succeed(2);
       const actual = new Node(start, undefined);
-      expect(await actual.runAsync()).toEqual({ success: true, data: 2 });
+      expect(await actual.runAsync()).toEqual({ success: true, value: 2 });
     });
 
     test("fail", async () => {
@@ -32,19 +32,19 @@ describe("Node", () => {
       const start = Block.succeed(2);
       const converting = (previous: Result<number, TestError>) =>
         previous.success
-          ? Block.succeed(previous.data + 2)
+          ? Block.succeed(previous.value + 2)
           : Block.fail(previous.error);
 
       const actual = new Node(start, undefined).add(converting);
 
-      expect(await actual.runAsync()).toEqual({ success: true, data: 4 });
+      expect(await actual.runAsync()).toEqual({ success: true, value: 4 });
     });
 
     test("fail", async () => {
       const start = Block.fail(new TestError());
       const converting = (previous: Result<number, TestError>) =>
         previous.success
-          ? Block.succeed(previous.data + 2)
+          ? Block.succeed(previous.value + 2)
           : Block.fail(previous.error);
 
       const actual = new Node(start, undefined).add(converting);
@@ -63,7 +63,7 @@ describe("Node", () => {
 
       const actual = new Node(start, undefined).onSuccess(converting);
 
-      expect(await actual.runAsync()).toEqual({ success: true, data: 4 });
+      expect(await actual.runAsync()).toEqual({ success: true, value: 4 });
     });
 
     test("fail", async () => {
@@ -87,7 +87,7 @@ describe("Node", () => {
 
       const actual = new Node(start, undefined).onError(converting);
 
-      expect(await actual.runAsync()).toEqual({ success: true, data: 2 });
+      expect(await actual.runAsync()).toEqual({ success: true, value: 2 });
     });
 
     test("fail", async () => {
@@ -112,7 +112,7 @@ describe("Node", () => {
 
       expect(await actual.runAsync()).toEqual({
         success: true,
-        data: "error2",
+        value: "error2",
       });
     });
   });
@@ -126,7 +126,7 @@ describe("Node", () => {
 
       expect(await actual.runAsync()).toEqual({
         success: true,
-        data: { extra: 3, current: 2 },
+        value: { extra: 3, current: 2 },
       });
     });
 
@@ -162,6 +162,6 @@ describe("Node", () => {
       .addContext({ extra: 3 })
       .onSuccess((data, context) => Block.succeed(data + context.extra));
 
-    expect(await actual.runAsync()).toEqual({ success: true, data: 5 });
+    expect(await actual.runAsync()).toEqual({ success: true, value: 5 });
   });
 });

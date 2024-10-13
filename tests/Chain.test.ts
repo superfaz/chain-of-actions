@@ -20,7 +20,7 @@ describe("Chain", () => {
 
       const actual: PromisedResult<{ key: string }> = node.runAsync();
       const awaited = await actual;
-      expect(awaited).toEqual({ success: true, data: initialData });
+      expect(awaited).toEqual({ success: true, value: initialData });
     });
 
     test("(initialData, context)", async () => {
@@ -30,7 +30,7 @@ describe("Chain", () => {
 
       const actual: PromisedResult<{ key: string }> = node.runAsync();
       const awaited = await actual;
-      expect(awaited).toEqual({ success: true, data: initialData });
+      expect(awaited).toEqual({ success: true, value: initialData });
     });
   });
 });

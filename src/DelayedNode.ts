@@ -27,7 +27,7 @@ abstract class BaseDelayedNode<
     return this.add(
       (r, c) =>
         (r.success
-          ? callback(r.data, c)
+          ? callback(r.value, c)
           : Block.fail(r.error)) as PromisedResult<DataB, Err | ErrB>,
     );
   }
@@ -38,7 +38,7 @@ abstract class BaseDelayedNode<
     return this.add(
       (r, c) =>
         (r.success
-          ? Block.succeed(r.data)
+          ? Block.succeed(r.value)
           : callback(r.error, c)) as PromisedResult<DataB, Err | ErrB>,
     );
   }
@@ -48,10 +48,10 @@ abstract class BaseDelayedNode<
   ): DelayedNode<Start, Context, Data & DataB, Err | ErrB, Data, Err> {
     return this.add((r, c) => {
       if (r.success) {
-        return callback(r.data, c).then(
+        return callback(r.value, c).then(
           (s) =>
             (s.success
-              ? Block.succeed({ ...r.data, ...s.data })
+              ? Block.succeed({ ...r.value, ...s.value })
               : Block.fail(s.error)) as PromisedResult<
               Data & DataB,
               Err | ErrB

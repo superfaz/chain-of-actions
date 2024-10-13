@@ -23,7 +23,7 @@ export class Node<Data, Err extends Error = never, Context = never> {
     return this.add(
       (r) =>
         (r.success
-          ? callback(r.data, this.context)
+          ? callback(r.value, this.context)
           : Block.fail(r.error)) as PromisedResult<Output, Err | OutputErr>,
     );
   }
@@ -32,7 +32,7 @@ export class Node<Data, Err extends Error = never, Context = never> {
     callback: ErrorAction<Err, Data, OutputErr, Context>,
   ): Node<Data, OutputErr, Context> {
     return this.add((r) =>
-      r.success ? Block.succeed(r.data) : callback(r.error, this.context),
+      r.success ? Block.succeed(r.value) : callback(r.error, this.context),
     );
   }
 
@@ -41,10 +41,10 @@ export class Node<Data, Err extends Error = never, Context = never> {
   ): Node<Data & Output, Err | OutputErr, Context> {
     return this.add((r) => {
       if (r.success) {
-        return callback(r.data, this.context).then(
+        return callback(r.value, this.context).then(
           (s) =>
             (s.success
-              ? Block.succeed({ ...r.data, ...s.data })
+              ? Block.succeed({ ...r.value, ...s.value })
               : Block.fail(s.error)) as PromisedResult<
               Data & Output,
               Err | OutputErr

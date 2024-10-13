@@ -13,21 +13,21 @@ describe("DelayedNode", () => {
     const chain = Chain.prepare<number>();
 
     const actual = await chain.runAsync(2, {});
-    expect(actual).toEqual({ success: true, data: 2 });
+    expect(actual).toEqual({ success: true, value: 2 });
   });
 
   describe("add()", () => {
     const chain = Chain.prepare<number>().add((result) =>
       result.success
-        ? result.data < 0
+        ? result.value < 0
           ? Block.fail(new TestError("negative"))
-          : Block.succeed(result.data + 2)
+          : Block.succeed(result.value + 2)
         : Block.fail(result.error),
     );
 
     test("success", async () => {
       const actual = await chain.runAsync(2, {});
-      expect(actual).toEqual({ success: true, data: 4 });
+      expect(actual).toEqual({ success: true, value: 4 });
     });
 
     test("fail", async () => {
@@ -41,16 +41,16 @@ describe("DelayedNode", () => {
 
   describe("onSuccess()", () => {
     const chain = Chain.prepare<number>()
-      .onSuccess((data) =>
-        data < 0
+      .onSuccess((value) =>
+        value < 0
           ? Block.fail(new TestError("negative"))
-          : Block.succeed(data + 2),
+          : Block.succeed(value + 2),
       )
-      .onSuccess((data) => Block.succeed(data * 2));
+      .onSuccess((value) => Block.succeed(value * 2));
 
     test("success", async () => {
       const actual = await chain.runAsync(2, {});
-      expect(actual).toEqual({ success: true, data: 8 });
+      expect(actual).toEqual({ success: true, value: 8 });
     });
 
     test("fail", async () => {
@@ -64,16 +64,16 @@ describe("DelayedNode", () => {
 
   describe("onError()", () => {
     const chain = Chain.prepare<number>()
-      .onSuccess((data) =>
-        data < 0
+      .onSuccess((value) =>
+        value < 0
           ? Block.fail(new TestError("negative"))
-          : Block.succeed(data + 2),
+          : Block.succeed(value + 2),
       )
       .onError(() => Block.fail(new TestError("error")));
 
     test("success", async () => {
       const actual = await chain.runAsync(2, {});
-      expect(actual).toEqual({ success: true, data: 4 });
+      expect(actual).toEqual({ success: true, value: 4 });
     });
 
     test("fail", async () => {
@@ -84,19 +84,19 @@ describe("DelayedNode", () => {
 
   describe("addData()", () => {
     const chain = Chain.prepare<number>()
-      .onSuccess((data) =>
-        data < 0 ? Block.fail(new TestError("error")) : Block.succeed(data),
+      .onSuccess((value) =>
+        value < 0 ? Block.fail(new TestError("error")) : Block.succeed(value),
       )
-      .addData((data) => Block.succeed({ a: data - 2 }))
-      .addData((data) =>
-        data.a < 0
+      .addData((value) => Block.succeed({ a: value - 2 }))
+      .addData((value) =>
+        value.a < 0
           ? Block.fail(new TestError("negative"))
-          : Block.succeed({ b: data.a * 2 }),
+          : Block.succeed({ b: value.a * 2 }),
       );
 
     test("success", async () => {
       const actual = await chain.runAsync(4, {});
-      expect(actual).toEqual({ success: true, data: { a: 2, b: 4 } });
+      expect(actual).toEqual({ success: true, value: { a: 2, b: 4 } });
     });
 
     test("fail", async () => {

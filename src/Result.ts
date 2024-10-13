@@ -1,6 +1,6 @@
 export interface SuccessResult<Data> {
   success: true;
-  data: Data;
+  value: Data;
 }
 
 export interface FailureResult<Err extends Error> {

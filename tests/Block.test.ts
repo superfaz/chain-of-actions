@@ -12,7 +12,7 @@ describe("Block", () => {
   test("succeed()", async () => {
     const actual: PromisedResult<string> = Block.succeed("Hello, World!");
 
-    expect(await actual).toEqual({ success: true, data: "Hello, World!" });
+    expect(await actual).toEqual({ success: true, value: "Hello, World!" });
   });
 
   test("fail()", async () => {
@@ -33,7 +33,7 @@ describe("Block", () => {
         catch: () => new TestError(),
       });
 
-      expect(await actual).toEqual({ success: true, data: "result" });
+      expect(await actual).toEqual({ success: true, value: "result" });
     });
 
     test("fail", async () => {

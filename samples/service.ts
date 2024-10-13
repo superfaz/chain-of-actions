@@ -119,13 +119,13 @@ export async function apiLike() {
     return new HttpResponse(500);
   }
 
-  const context = await createContext(configuration.data);
+  const context = await createContext(configuration.value);
   if (!context.success) {
     console.error("Unexpected error while preparing context", context.error);
     return new HttpResponse(500);
   }
 
-  const user = await start("alice", context.data)
+  const user = await start("alice", context.value)
     .onSuccess((id, { database }) => database.getUser(id))
     .runAsync();
 
@@ -133,5 +133,5 @@ export async function apiLike() {
     return new HttpResponse(404, "User not found");
   }
 
-  return new HttpResponse(200, JSON.stringify(user.data));
+  return new HttpResponse(200, JSON.stringify(user.value));
 }
