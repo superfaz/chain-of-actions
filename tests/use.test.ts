@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest";
-import { fail, start, succeed } from "../src";
+import { fail, Result, start, succeed } from "../src";
 
 class TestError extends Error {
   constructor(message?: string) {
@@ -92,6 +92,34 @@ describe("Usage", () => {
       .onSuccess(action2);
 
     expect(await actual.runAsync()).toEqual({ success: true, data: 12 });
+  });
+
+  test("onError to catch and manage errors during process (success)", async () => {
+    const manageError = function (): never {
+      throw new Error("error");
+    };
+
+    const actual: Result<number> = await start(2)
+      .onSuccess((data) => (data < 2 ? fail(new TestError()) : succeed(data)))
+      .onError(manageError)
+      .onSuccess((data) => succeed(data * 2))
+      .runAsync();
+
+    expect(actual).toEqual({ success: true, data: 4 });
+  });
+
+  test("onError to catch and manage errors during process (failure)", async () => {
+    const manageError = function (): never {
+      throw new Error("error");
+    };
+
+    const actual = start(1)
+      .onSuccess((data) => (data < 2 ? fail(new TestError()) : succeed(data)))
+      .onError(manageError)
+      .onSuccess((data) => succeed(data * 2))
+      .runAsync();
+
+    await expect(actual).rejects.toThrow(new Error("error"));
   });
 
   test("error handling", async () => {

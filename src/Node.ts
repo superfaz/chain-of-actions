@@ -10,7 +10,7 @@ export class Node<Data, Err extends Error = never, Context = never> {
 
   public add<Output, OutputErr extends Error>(
     node: Action<Data, Output, Err, OutputErr, Context>,
-  ): Node<Output, Err | OutputErr, Context> {
+  ): Node<Output, OutputErr, Context> {
     return new Node(
       this.node.then((r) => node(r, this.context)),
       this.context,
@@ -28,17 +28,11 @@ export class Node<Data, Err extends Error = never, Context = never> {
     );
   }
 
-  public onError<Output, OutputErr extends Error>(
-    callback: ErrorAction<Err, Output, OutputErr, Context>,
-  ): Node<Output, Err | OutputErr, Context> {
-    return this.add(
-      (r) =>
-        (r.success
-          ? Block.succeed(r.data)
-          : callback(r.error, this.context)) as PromisedResult<
-          Output,
-          Err | OutputErr
-        >,
+  public onError<OutputErr extends Error = never>(
+    callback: ErrorAction<Err, Data, OutputErr, Context>,
+  ): Node<Data, OutputErr, Context> {
+    return this.add((r) =>
+      r.success ? Block.succeed(r.data) : callback(r.error, this.context),
     );
   }
 
