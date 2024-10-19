@@ -1,6 +1,6 @@
 {
   "name": "chain-of-actions",
-  "version": "0.9.1",
+  "version": "0.9.2",
   "author": "Francois Karman",
   "type": "module",
   "license": "MIT",
@@ -18,7 +18,7 @@
   },
   "exports": {
     "import": "./dist/esm/index.js",
-    "require": "./dist/cjs/index.js"
+    "require": "./dist/cjs/index.cjs"
   },
   "files": [
     "/dist"
@@ -26,7 +26,7 @@
   "scripts": {
     "prebuild": "rimraf dist/",
     "build:esm": "tsc -p tsconfig.json",
-    "build:cjs": "tsc -p tsconfig.cjs.json",
+    "build:cjs": "tsc -p tsconfig.cjs.json && renamer --find js --replace cjs ./dist/cjs/*",
     "build": "pnpm run build:esm && pnpm run build:cjs",
     "lint": "prettier --check . && eslint .",
     "test": "vitest",
@@ -41,6 +41,7 @@
     "@vitest/coverage-v8": "^2.1.2",
     "eslint": "^9.12.0",
     "prettier": "^3.3.3",
+    "renamer": "^5.0.2",
     "rimraf": "^6.0.1",
     "typescript-eslint": "^8.8.1",
     "vitest": "^2.1.2"
