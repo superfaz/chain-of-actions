@@ -1,29 +1,34 @@
 import Block from "./Block";
 import { PromisedResult, Result } from "./Result";
 
-interface IDelayedNode<Start, Context extends object, Data, Err extends Error> {
-  runAsync(start: Start, context: Context): PromisedResult<Data, Err>;
+interface IDelayedNode<
+  Start,
+  Context extends object,
+  Output,
+  Err extends Error,
+> {
+  runAsync(initial: Start, context: Context): PromisedResult<Output, Err>;
 }
 
 abstract class BaseDelayedNode<
   Start,
   Context extends object,
-  Data,
+  Output,
   Err extends Error,
-> implements IDelayedNode<Start, Context, Data, Err>
+> implements IDelayedNode<Start, Context, Output, Err>
 {
   public add<DataB, ErrB extends Error>(
     node: (
-      previous: Result<Data, Err>,
+      previous: Result<Output, Err>,
       context: Context,
     ) => PromisedResult<DataB, ErrB>,
-  ): DelayedNode<Start, Context, DataB, ErrB, Data, Err> {
+  ): DelayedNode<Start, Context, DataB, ErrB, Output, Err> {
     return new DelayedNode(node, this);
   }
 
   public onSuccess<DataB, ErrB extends Error>(
-    callback: (data: Data, context: Context) => PromisedResult<DataB, ErrB>,
-  ): DelayedNode<Start, Context, DataB, Err | ErrB, Data, Err> {
+    callback: (data: Output, context: Context) => PromisedResult<DataB, ErrB>,
+  ): DelayedNode<Start, Context, DataB, Err | ErrB, Output, Err> {
     return this.add(
       (r, c) =>
         (r.success
@@ -34,7 +39,7 @@ abstract class BaseDelayedNode<
 
   public onError<DataB, ErrB extends Error>(
     callback: (error: Err, context: Context) => PromisedResult<DataB, ErrB>,
-  ): DelayedNode<Start, Context, DataB, Err | ErrB, Data, Err> {
+  ): DelayedNode<Start, Context, DataB, Err | ErrB, Output, Err> {
     return this.add(
       (r, c) =>
         (r.success
@@ -44,8 +49,8 @@ abstract class BaseDelayedNode<
   }
 
   public addData<DataB, ErrB extends Error>(
-    callback: (data: Data, context: Context) => PromisedResult<DataB, ErrB>,
-  ): DelayedNode<Start, Context, Data & DataB, Err | ErrB, Data, Err> {
+    callback: (data: Output, context: Context) => PromisedResult<DataB, ErrB>,
+  ): DelayedNode<Start, Context, Output & DataB, Err | ErrB, Output, Err> {
     return this.add((r, c) => {
       if (r.success) {
         return callback(r.value, c).then(
@@ -53,7 +58,7 @@ abstract class BaseDelayedNode<
             (s.success
               ? Block.succeed({ ...r.value, ...s.value })
               : Block.fail(s.error)) as PromisedResult<
-              Data & DataB,
+              Output & DataB,
               Err | ErrB
             >,
         );
@@ -63,25 +68,28 @@ abstract class BaseDelayedNode<
     });
   }
 
-  abstract runAsync(start: Start, context: Context): PromisedResult<Data, Err>;
+  abstract runAsync(
+    start: Start,
+    context: Context,
+  ): PromisedResult<Output, Err>;
 }
 
 export class DelayedNode<
     Start,
     Context extends object,
-    Data,
+    Output,
     Err extends Error,
     PreviousData,
     PreviousErr extends Error,
   >
-  extends BaseDelayedNode<Start, Context, Data, Err>
-  implements IDelayedNode<Start, Context, Data, PreviousErr | Err>
+  extends BaseDelayedNode<Start, Context, Output, Err>
+  implements IDelayedNode<Start, Context, Output, PreviousErr | Err>
 {
   constructor(
     private readonly node: (
       result: Result<PreviousData, PreviousErr>,
       context: Context,
-    ) => PromisedResult<Data, Err>,
+    ) => PromisedResult<Output, Err>,
     private readonly previous: IDelayedNode<
       Start,
       Context,
@@ -92,7 +100,7 @@ export class DelayedNode<
     super();
   }
 
-  public runAsync(start: Start, context: Context): PromisedResult<Data, Err> {
+  public runAsync(start: Start, context: Context): PromisedResult<Output, Err> {
     return this.previous
       .runAsync(start, context)
       .then((result) => this.node(result, context));

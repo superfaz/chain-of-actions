@@ -3,11 +3,11 @@ import { DelayedRoot } from "./DelayedNode";
 import { Node } from "./Node";
 
 export function start(): Node<undefined>;
-export function start<Data>(initial: Data): Node<Data>;
-export function start<Data, Context>(
-  initial: Data,
+export function start<Value>(initial: Value): Node<Value>;
+export function start<Value, Context>(
+  initial: Value,
   context: Context,
-): Node<Data, never, Context>;
+): Node<Value, never, Context>;
 export function start<Data, Context>(
   initial?: Data,
   context?: Context,
@@ -16,10 +16,10 @@ export function start<Data, Context>(
 }
 
 export function prepare<
-  Data,
+  Value,
   Context extends object = Record<string, never>,
->(): DelayedRoot<Data, Context> {
-  return new DelayedRoot<Data, Context>();
+>(): DelayedRoot<Value, Context> {
+  return new DelayedRoot<Value, Context>();
 }
 
 export default { start, prepare };

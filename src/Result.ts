@@ -1,6 +1,6 @@
-export interface SuccessResult<Data> {
+export interface SuccessResult<Value> {
   success: true;
-  value: Data;
+  value: Value;
 }
 
 export interface FailureResult<Err extends Error> {
@@ -8,10 +8,10 @@ export interface FailureResult<Err extends Error> {
   error: Err;
 }
 
-export type Result<Data, Err extends Error = never> =
-  | SuccessResult<Data>
+export type Result<Value, Err extends Error = never> =
+  | SuccessResult<Value>
   | FailureResult<Err>;
 
-export type PromisedResult<Data, Err extends Error = never> = Promise<
-  Result<Data, Err>
+export type PromisedResult<Value, Err extends Error = never> = Promise<
+  Result<Value, Err>
 >;

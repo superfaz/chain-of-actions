@@ -2,14 +2,14 @@ import { Action, ErrorAction, DataAction } from "./Action";
 import Block from "./Block";
 import { PromisedResult } from "./Result";
 
-export class Node<Data, Err extends Error = never, Context = never> {
+export class Node<Value, Err extends Error = never, Context = never> {
   constructor(
-    private readonly node: PromisedResult<Data, Err>,
+    private readonly node: PromisedResult<Value, Err>,
     private readonly context: Context,
   ) {}
 
   public add<Output, OutputErr extends Error>(
-    node: Action<Data, Output, Err, OutputErr, Context>,
+    node: Action<Value, Output, Err, OutputErr, Context>,
   ): Node<Output, OutputErr, Context> {
     return new Node(
       this.node.then((r) => node(r, this.context)),
@@ -18,7 +18,7 @@ export class Node<Data, Err extends Error = never, Context = never> {
   }
 
   public onSuccess<Output, OutputErr extends Error>(
-    callback: DataAction<Data, Output, OutputErr, Context>,
+    callback: DataAction<Value, Output, OutputErr, Context>,
   ): Node<Output, Err | OutputErr, Context> {
     return this.add(
       (r) =>
@@ -29,16 +29,16 @@ export class Node<Data, Err extends Error = never, Context = never> {
   }
 
   public onError<OutputErr extends Error = never>(
-    callback: ErrorAction<Err, Data, OutputErr, Context>,
-  ): Node<Data, OutputErr, Context> {
+    callback: ErrorAction<Err, Value, OutputErr, Context>,
+  ): Node<Value, OutputErr, Context> {
     return this.add((r) =>
       r.success ? Block.succeed(r.value) : callback(r.error, this.context),
     );
   }
 
   public addData<Output, OutputErr extends Error>(
-    callback: DataAction<Data, Output, OutputErr, Context>,
-  ): Node<Data & Output, Err | OutputErr, Context> {
+    callback: DataAction<Value, Output, OutputErr, Context>,
+  ): Node<Value & Output, Err | OutputErr, Context> {
     return this.add((r) => {
       if (r.success) {
         return callback(r.value, this.context).then(
@@ -46,7 +46,7 @@ export class Node<Data, Err extends Error = never, Context = never> {
             (s.success
               ? Block.succeed({ ...r.value, ...s.value })
               : Block.fail(s.error)) as PromisedResult<
-              Data & Output,
+              Value & Output,
               Err | OutputErr
             >,
         );
@@ -59,14 +59,14 @@ export class Node<Data, Err extends Error = never, Context = never> {
   public addContext<ContextB>(
     extra: ContextB,
   ): Node<
-    Data,
+    Value,
     Err,
     [Context] extends [never] ? ContextB : Context & ContextB
   > {
     return new Node(this.node, { ...this.context, ...extra });
   }
 
-  public runAsync(): PromisedResult<Data, Err> {
+  public runAsync(): PromisedResult<Value, Err> {
     return this.node;
   }
 }
