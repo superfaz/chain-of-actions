@@ -1,6 +1,6 @@
 {
   "name": "chain-of-actions",
-  "version": "0.9.3",
+  "version": "0.9.4",
   "author": "Francois Karman",
   "type": "module",
   "license": "MIT",
@@ -17,14 +17,8 @@
     "url": "git+https://github.com/superfaz/chain-of-actions.git"
   },
   "exports": {
-    ".": {
-      "import": "./dist/esm/index.js",
-      "require": "./dist/cjs/index.cjs"
-    },
-    "./Action": {
-      "import": "./dist/esm/Action.js",
-      "require": "./dist/cjs/Action.cjs"
-    }
+    ".": "./dist/esm/index.js",
+    "./*": "./dist/esm/*.js"
   },
   "files": [
     "/dist"
@@ -34,7 +28,7 @@
     "build:esm": "tsc -p tsconfig.json",
     "build:cjs": "tsc -p tsconfig.cjs.json && renamer --find js --replace cjs ./dist/cjs/*",
     "build": "pnpm run build:esm && pnpm run build:cjs",
-    "lint": "prettier --check . && eslint .",
+    "lint": "prettier --check . && eslint . && pnpm dlx publint",
     "test": "vitest",
     "all": "pnpm run lint && pnpm run build && pnpm run test run"
   },
