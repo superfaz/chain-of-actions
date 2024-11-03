@@ -27,8 +27,8 @@
     "prebuild": "rimraf dist/",
     "build:esm": "tsc -p tsconfig.json",
     "build:cjs": "tsc -p tsconfig.cjs.json && renamer --find js --replace cjs ./dist/cjs/*",
-    "build": "pnpm run build:esm && pnpm run build:cjs",
-    "lint": "prettier --check . && eslint . && pnpm dlx publint",
+    "build": "pnpm run build:esm && pnpm run build:cjs && pnpm dlx publint",
+    "lint": "prettier --check . && eslint .",
     "test": "vitest",
     "all": "pnpm run lint && pnpm run build && pnpm run test run"
   },
