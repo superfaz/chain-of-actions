@@ -1,6 +1,6 @@
 {
   "name": "chain-of-actions",
-  "version": "0.9.4",
+  "version": "0.9.5",
   "author": "Francois Karman",
   "type": "module",
   "license": "MIT",
@@ -17,17 +17,18 @@
     "url": "git+https://github.com/superfaz/chain-of-actions.git"
   },
   "exports": {
-    ".": "./dist/esm/index.js",
-    "./*": "./dist/esm/*.js"
+    ".": {
+      "types": "./dist/index.d.ts",
+      "require": "./dist/index.cjs",
+      "default": "./dist/index.mjs"
+    }
   },
   "files": [
     "/dist"
   ],
   "scripts": {
     "prebuild": "rimraf dist/",
-    "build:esm": "tsc -p tsconfig.json",
-    "build:cjs": "tsc -p tsconfig.cjs.json && renamer --find js --replace cjs ./dist/cjs/*",
-    "build": "pnpm run build:esm && pnpm run build:cjs && pnpm dlx publint",
+    "build": "pkgroll && pnpm dlx publint",
     "lint": "prettier --check . && eslint .",
     "test": "vitest",
     "all": "pnpm run lint && pnpm run build && pnpm run test run"
@@ -40,6 +41,7 @@
     "@eslint/js": "^9.12.0",
     "@vitest/coverage-v8": "^2.1.2",
     "eslint": "^9.12.0",
+    "pkgroll": "^2.5.1",
     "prettier": "^3.3.3",
     "renamer": "^5.0.2",
     "rimraf": "^6.0.1",
