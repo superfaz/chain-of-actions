@@ -63,15 +63,11 @@ describe("Usage", () => {
       .addData(() => service2)
       .runAsync();
 
-    if (services.success) {
-      const actual = start(2, services.value)
-        .onSuccess(action1)
-        .onSuccess(action1)
-        .onSuccess(action2);
-      expect(await actual.runAsync()).toEqual({ success: true, value: 24 });
-    } else {
-      expect.fail("services failed");
-    }
+    const actual = start(2, services.value)
+      .onSuccess(action1)
+      .onSuccess(action1)
+      .onSuccess(action2);
+    expect(await actual.runAsync()).toEqual({ success: true, value: 24 });
   });
 
   test("Add 2 services and recover from an error", async () => {

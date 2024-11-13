@@ -1,6 +1,6 @@
 import { Action, ErrorAction, DataAction } from "./Action";
 import Block from "./Block";
-import { PromisedResult } from "./Result";
+import { PromisedResult, SuccessResult } from "./Result";
 
 export class Node<Value, Err extends Error = never, Context = never> {
   constructor(
@@ -66,7 +66,17 @@ export class Node<Value, Err extends Error = never, Context = never> {
     return new Node(this.node, { ...this.context, ...extra });
   }
 
-  public runAsync(): PromisedResult<Value, Err> {
-    return this.node;
+  /**
+   * Executes the node.
+   *
+   * @returns A `PromisedResult` linked to the execution of the node. Or a `SuccessResult` if `Err` is `never`.
+   */
+  public runAsync(): [Err] extends [never]
+    ? Promise<SuccessResult<Value>>
+    : PromisedResult<Value, Err> {
+    // 'as' used as an hack as PromisedResult can't use conditional type
+    return this.node as [Err] extends [never]
+      ? Promise<SuccessResult<Value>>
+      : PromisedResult<Value, Err>;
   }
 }
