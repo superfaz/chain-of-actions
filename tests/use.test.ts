@@ -39,7 +39,8 @@ describe("Usage", () => {
         : fail(new TestError("negative"));
     const action2 = (value: number) => succeed(value * 2);
 
-    const actual = start(2)
+    const actual = start()
+      .onSuccess(() => succeed(2))
       .addContext(service1)
       .addContext(service2)
       .onSuccess(action1)
@@ -63,7 +64,8 @@ describe("Usage", () => {
       .addData(() => service2)
       .runAsync();
 
-    const actual = start(2, services.value)
+    const actual = start(services.value)
+      .onSuccess(() => succeed(2))
       .onSuccess(action1)
       .onSuccess(action1)
       .onSuccess(action2);
@@ -79,7 +81,8 @@ describe("Usage", () => {
         : fail(new TestError("negative"));
     const action2 = (value: number) => succeed(value * 2);
 
-    const actual = start(-2)
+    const actual = start()
+      .onSuccess(() => succeed(-2))
       .addContext(service1)
       .addContext(service2)
       .onSuccess(action1)
@@ -95,7 +98,8 @@ describe("Usage", () => {
       throw new Error("error");
     };
 
-    const actual: Result<number> = await start(2)
+    const actual: Result<number> = await start()
+      .onSuccess(() => succeed(2))
       .onSuccess((value) =>
         value < 2 ? fail(new TestError()) : succeed(value),
       )
@@ -111,7 +115,8 @@ describe("Usage", () => {
       throw new Error("error");
     };
 
-    const actual = start(1)
+    const actual = start()
+      .onSuccess(() => succeed(1))
       .onSuccess((value) =>
         value < 2 ? fail(new TestError()) : succeed(value),
       )

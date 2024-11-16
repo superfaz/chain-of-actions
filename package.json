@@ -1,6 +1,6 @@
 {
   "name": "chain-of-actions",
-  "version": "0.9.6",
+  "version": "0.10.0",
   "author": "Francois Karman",
   "type": "module",
   "license": "MIT",
@@ -38,14 +38,14 @@
     "typescript": "^5.6.3"
   },
   "devDependencies": {
-    "@eslint/js": "^9.14.0",
-    "@vitest/coverage-v8": "^2.1.4",
+    "@eslint/js": "^9.15.0",
+    "@vitest/coverage-v8": "^2.1.5",
     "eslint": "^9.14.0",
     "pkgroll": "^2.5.1",
     "prettier": "^3.3.3",
     "renamer": "^5.0.2",
     "rimraf": "^6.0.1",
-    "typescript-eslint": "^8.13.0",
-    "vitest": "^2.1.4"
+    "typescript-eslint": "^8.14.0",
+    "vitest": "^2.1.5"
   }
 }

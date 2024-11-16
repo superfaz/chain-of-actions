@@ -3,16 +3,13 @@ import { DelayedRoot } from "./DelayedNode";
 import { Node } from "./Node";
 
 export function start(): Node<undefined>;
-export function start<Value>(initial: Value): Node<Value>;
-export function start<Value, Context>(
-  initial: Value,
+export function start<Context>(
   context: Context,
-): Node<Value, never, Context>;
-export function start<Data, Context>(
-  initial?: Data,
+): Node<undefined, never, Context>;
+export function start<Context>(
   context?: Context,
-): Node<Data | undefined, never, Context | undefined> {
-  return new Node(Block.succeed(initial), context);
+): Node<undefined, never, Context | undefined> {
+  return new Node(Block.succeed(undefined), context);
 }
 
 export function prepare<

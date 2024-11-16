@@ -2,6 +2,7 @@ import { describe, expect, test } from "vitest";
 import Chain from "../src/Chain";
 import { Node } from "../src/Node";
 import { PromisedResult } from "../src/Result";
+import { succeed } from "../src/Block";
 
 describe("Chain", () => {
   describe("start", () => {
@@ -14,23 +15,17 @@ describe("Chain", () => {
       expect(awaited).toEqual({ success: true });
     });
 
-    test("(initialData)", async () => {
-      const initialData = { key: "value" };
-      const node = Chain.start(initialData);
-
-      const actual: PromisedResult<{ key: string }> = node.runAsync();
-      const awaited = await actual;
-      expect(awaited).toEqual({ success: true, value: initialData });
-    });
-
-    test("(initialData, context)", async () => {
+    test("(context)", async () => {
       const initialData = { key: "value" };
       const context = { user: "testUser" };
-      const node = Chain.start(initialData, context);
 
-      const actual: PromisedResult<{ key: string }> = node.runAsync();
-      const awaited = await actual;
-      expect(awaited).toEqual({ success: true, value: initialData });
+      const firstNode = Chain.start(context);
+      const first: PromisedResult<undefined> = firstNode.runAsync();
+      expect(await first).toEqual({ success: true });
+
+      const secondNode = firstNode.onSuccess(() => succeed(initialData));
+      const second: PromisedResult<{ key: string }> = secondNode.runAsync();
+      expect(await second).toEqual({ success: true, value: initialData });
     });
   });
 });

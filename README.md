@@ -36,7 +36,7 @@ async function getUser(
 
 Calling this method will return two possible results:
 
-- `{success: true, data: {...}}` - A success result, where `data` will be a **User** instance
+- `{success: true, value: {...}}` - A success result, where `value` will be a **User** instance
 - `{success: false, error: {...}}` - a failed result, where `error` will be a **DatabaseError | MissingDataError** instance.
 
 To implement this method, we can use a few helpers from the `Block` and `Chain` class:

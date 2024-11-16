@@ -125,7 +125,8 @@ export async function apiLike() {
     return new HttpResponse(500);
   }
 
-  const user = await start("alice", context.value)
+  const user = await start(context.value)
+    .onSuccess(() => succeed("alice"))
     .onSuccess((id, { database }) => database.getUser(id))
     .runAsync();
 
