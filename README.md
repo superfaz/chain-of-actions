@@ -2,7 +2,7 @@
 
 This project aims to provide a typed error management for typescript code.
 
-## The problem
+## The Problem
 
 Typescript error management is based on the `try`/`catch` statements and this approach doesn't provide a strong-type management for error handling.
 
@@ -39,32 +39,66 @@ Calling this method will return two possible results:
 - `{success: true, value: {...}}` - A success result, where `value` will be a **User** instance
 - `{success: false, error: {...}}` - a failed result, where `error` will be a **DatabaseError | MissingDataError** instance.
 
-To implement this method, we can use a few helpers from the `Block` and `Chain` class:
+> [!NOTE]
+> This approach ensures that the possible errors are typed and forces to manage them as the caller will have to check the `success` property.
+
+A simple implementation using this approach would be the following:
 
 ```typescript
 async function getUser(
   id: number,
 ): PromisedResult<User, DatabaseError | MissingDataError> {
-  return Chain.start()
+  try {
+    // Retrieve the user - mock a normal call to a datasource handler.
+    const user = database.get("User", id);
+    if (!user) {
+      // Raise a typed error as the user doesn't exist
+      return fail(new MissingDataError("User", id));
+    } else {
+      // Success result
+      return success(user);
+    }
+  } catch (e: unknown) {
+    // Raise a typed error as the datasource raises an error.
+    return fail(new DatabaseError(e));
+  }
+}
+```
+
+| Helpers     | Explanation                  |
+| ----------- | ---------------------------- |
+| `succeed()` | Create a successful response |
+| `fail()`    | Create a failed response     |
+
+To implement this method, we can use a few helpers, namely `start`, `convert`, `succeed` and `fail` :
+
+## Chain of Actions
+
+Knowning if an action failed or not allows to chain actions based on their statuses. For this, this library provides a `start` function to create a chain of actions.
+
+```typescript
+async function getUser(
+  id: number,
+): PromisedResult<User, DatabaseError | MissingDataError> {
+  return start()
     .add(() =>
-      Block.convert({
+      convert({
         try: () => database.get("User", id),
         catch: (e) => new DatabaseError(e),
       }),
     )
     .onSuccess((user) =>
-      user ? Block.succeed(user) : Block.fail(new MissingDataError("User", id)),
+      user ? succeed(user) : fail(new MissingDataError("User", id)),
     );
 }
 ```
 
-| Code                 | Explanation                                                               |
+| Helpers              | Explanation                                                               |
 | -------------------- | ------------------------------------------------------------------------- |
-| `Chain.start()`      | starts a chain of actions with a specific data                            |
+| `start()`            | starts a chain of actions with a specific data                            |
 | `.add(action)`       | adds a new node to the chain                                              |
 | `.onSuccess(action)` | adds a new node that will execute its action if the previous node succeed |
-| `Block.succeed()`    | Create a successful response                                              |
-| `Block.fail()`       | Create a failed response                                                  |
+| `convert(fct, err)`  | Convert a standard `Promise` call to a `PromisedResult`                   |
 
 > [!NOTE]
 > This example can still be improved: the current implementation uses a `database` object : Where is it initialized? How are the error managed for it?
