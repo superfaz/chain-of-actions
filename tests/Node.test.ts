@@ -13,13 +13,13 @@ describe("Node", () => {
   describe("runAsync()", () => {
     test("success", async () => {
       const start = Block.succeed(2);
-      const actual = new Node(start, undefined);
+      const actual = new Node(start);
       expect(await actual.runAsync()).toEqual({ success: true, value: 2 });
     });
 
     test("fail", async () => {
       const start = Block.fail(new TestError());
-      const actual = new Node(start, undefined);
+      const actual = new Node(start);
       expect(await actual.runAsync()).toEqual({
         success: false,
         error: new TestError("error"),
@@ -27,7 +27,7 @@ describe("Node", () => {
     });
   });
 
-  describe("run()", () => {
+  describe("add()", () => {
     test("success", async () => {
       const start = Block.succeed(2);
       const converting = (previous: Result<number, TestError>) =>
@@ -35,7 +35,7 @@ describe("Node", () => {
           ? Block.succeed(previous.value + 2)
           : Block.fail(previous.error);
 
-      const actual = new Node(start, undefined).add(converting);
+      const actual = new Node(start).add(converting);
 
       expect(await actual.runAsync()).toEqual({ success: true, value: 4 });
     });
@@ -47,7 +47,7 @@ describe("Node", () => {
           ? Block.succeed(previous.value + 2)
           : Block.fail(previous.error);
 
-      const actual = new Node(start, undefined).add(converting);
+      const actual = new Node(start).add(converting);
 
       expect(await actual.runAsync()).toEqual({
         success: false,
@@ -61,7 +61,7 @@ describe("Node", () => {
       const start = Block.succeed(2);
       const converting = (previous: number) => Block.succeed(previous + 2);
 
-      const actual = new Node(start, undefined).onSuccess(converting);
+      const actual = new Node(start).onSuccess(converting);
 
       expect(await actual.runAsync()).toEqual({ success: true, value: 4 });
     });
@@ -70,7 +70,7 @@ describe("Node", () => {
       const start = Block.fail(new TestError());
       const converting = (previous: number) => Block.succeed(previous + 2);
 
-      const actual = new Node(start, undefined).onSuccess(converting);
+      const actual = new Node(start).onSuccess(converting);
 
       expect(await actual.runAsync()).toEqual({
         success: false,
@@ -85,7 +85,7 @@ describe("Node", () => {
       const converting = (error: TestError) =>
         Block.fail(new TestError(error.message + "2"));
 
-      const actual = new Node(start, undefined).onError(converting);
+      const actual = new Node(start).onError(converting);
 
       expect(await actual.runAsync()).toEqual({ success: true, value: 2 });
     });
@@ -95,7 +95,7 @@ describe("Node", () => {
       const converting = (error: TestError) =>
         Block.fail(new TestError(error.message + "2"));
 
-      const actual = new Node(start, undefined).onError(converting);
+      const actual = new Node(start).onError(converting);
 
       expect(await actual.runAsync()).toEqual({
         success: false,
@@ -104,64 +104,18 @@ describe("Node", () => {
     });
 
     test("recover", async () => {
-      const start = Block.fail(new TestError());
+      const start = Block.succeed(undefined);
+      const error = (previous: unknown) =>
+        previous ? Block.succeed("ok") : Block.fail(new TestError());
       const converting = (error: TestError) =>
         Block.succeed(error.message + "2");
 
-      const actual = new Node(start, undefined).onError(converting);
+      const actual = new Node(start).onSuccess(error).onError(converting);
 
       expect(await actual.runAsync()).toEqual({
         success: true,
         value: "error2",
       });
     });
-  });
-
-  describe("addData()", () => {
-    test("success", async () => {
-      const start = Block.succeed({ current: 2 });
-      const extra = () => Block.succeed({ extra: 3 });
-
-      const actual = new Node(start, undefined).addData(extra);
-
-      expect(await actual.runAsync()).toEqual({
-        success: true,
-        value: { extra: 3, current: 2 },
-      });
-    });
-
-    test("fail", async () => {
-      const start = Block.fail(new TestError());
-      const extra = () => Block.succeed({ extra: 3 });
-
-      const actual = new Node(start, undefined).addData(extra);
-
-      expect(await actual.runAsync()).toEqual({
-        success: false,
-        error: new TestError("error"),
-      });
-    });
-
-    test("failing data", async () => {
-      const start = Block.succeed({ current: 2 });
-      const extra = () => Block.fail(new TestError("data error"));
-
-      const actual = new Node(start, undefined).addData(extra);
-
-      expect(await actual.runAsync()).toEqual({
-        success: false,
-        error: new TestError("data error"),
-      });
-    });
-  });
-
-  test("addContext() success", async () => {
-    const start = Block.succeed(2);
-
-    const actual = new Node(start, {})
-      .addContext({ extra: 3 })
-      .onSuccess((data, context) => Block.succeed(data + context.extra));
-
-    expect(await actual.runAsync()).toEqual({ success: true, value: 5 });
   });
 });

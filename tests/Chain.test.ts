@@ -20,8 +20,8 @@ describe("Chain", () => {
       const context = { user: "testUser" };
 
       const firstNode = Chain.start(context);
-      const first: PromisedResult<undefined> = firstNode.runAsync();
-      expect(await first).toEqual({ success: true });
+      const first: PromisedResult<object> = firstNode.runAsync();
+      expect(await first).toEqual({ success: true, value: {} });
 
       const secondNode = firstNode.onSuccess(() => succeed(initialData));
       const second: PromisedResult<{ key: string }> = secondNode.runAsync();

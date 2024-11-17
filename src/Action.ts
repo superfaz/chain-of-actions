@@ -5,7 +5,28 @@ export interface Action<
   Output,
   InputErr extends Error = never,
   OutputErr extends Error = never,
-  Context = never,
+> {
+  (previous: Result<Input, InputErr>): PromisedResult<Output, OutputErr>;
+}
+
+export interface DataAction<Input, Output, OutputErr extends Error = never> {
+  (data: Input): PromisedResult<Output, OutputErr>;
+}
+
+export interface ErrorAction<
+  InputErr extends Error,
+  Output,
+  OutputErr extends Error = never,
+> {
+  (error: InputErr): PromisedResult<Output, OutputErr>;
+}
+
+export interface ActionWithContext<
+  Input extends object,
+  Output,
+  InputErr extends Error = never,
+  OutputErr extends Error = never,
+  Context extends object = Record<string, never>,
 > {
   (
     previous: Result<Input, InputErr>,
@@ -13,20 +34,20 @@ export interface Action<
   ): PromisedResult<Output, OutputErr>;
 }
 
-export interface DataAction<
-  Input,
+export interface DataActionWithContext<
+  Input extends object,
   Output,
   OutputErr extends Error = never,
-  Context = never,
+  Context extends object = Record<string, never>,
 > {
-  (data: Input, context: Context): PromisedResult<Output, OutputErr>;
+  (data: Input & Context): PromisedResult<Output, OutputErr>;
 }
 
-export interface ErrorAction<
+export interface ErrorActionWithContext<
   InputErr extends Error,
   Output,
   OutputErr extends Error = never,
-  Context = never,
+  Context extends object = Record<string, never>,
 > {
   (error: InputErr, context: Context): PromisedResult<Output, OutputErr>;
 }

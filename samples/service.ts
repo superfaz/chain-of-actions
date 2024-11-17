@@ -126,8 +126,8 @@ export async function apiLike() {
   }
 
   const user = await start(context.value)
-    .onSuccess(() => succeed("alice"))
-    .onSuccess((id, { database }) => database.getUser(id))
+    .onSuccess(() => succeed({ id: "alice" }))
+    .onSuccess(({ id, database }) => database.getUser(id))
     .runAsync();
 
   if (!user.success) {
