@@ -28,11 +28,10 @@ export class NodeWithContext<
   public onSuccess<Output extends object, OutputErr extends Error>(
     callback: DataActionWithContext<Value, Output, OutputErr, Context>,
   ): NodeWithContext<Output, Err | OutputErr, Context> {
-    return this.add(
-      (r) =>
-        (r.success
-          ? callback({ ...r.value, ...this.context })
-          : Block.fail(r.error)) as PromisedResult<Output, Err | OutputErr>,
+    return this.add((r) =>
+      r.success
+        ? callback({ ...r.value, ...this.context })
+        : (Block.fail(r.error) as PromisedResult<Output, Err | OutputErr>),
     );
   }
 
@@ -49,14 +48,13 @@ export class NodeWithContext<
   ): NodeWithContext<Value & Output, Err | OutputErr, Context> {
     return this.add((r) => {
       if (r.success) {
-        return callback({ ...r.value, ...this.context }).then(
-          (s) =>
-            (s.success
-              ? Block.succeed({ ...r.value, ...s.value })
-              : Block.fail(s.error)) as PromisedResult<
-              Value & Output,
-              Err | OutputErr
-            >,
+        return callback({ ...r.value, ...this.context }).then((s) =>
+          s.success
+            ? Block.succeed({ ...r.value, ...s.value })
+            : (Block.fail(s.error) as PromisedResult<
+                Value & Output,
+                Err | OutputErr
+              >),
         );
       } else {
         return Block.fail(r.error);
