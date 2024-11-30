@@ -3,17 +3,21 @@ import { DelayedRoot } from "./DelayedNode";
 import { Node } from "./Node";
 import { NodeWithContext } from "./NodeWithContext";
 
+export type Empty = Record<string, never>;
+
+export const empty: Empty = {};
+
 export function start(): Node<undefined>;
 export function start<Context extends object>(
   context: Context,
-): NodeWithContext<object, never, Context>;
+): NodeWithContext<Empty, never, Context>;
 export function start<Context extends object>(
   context?: Context,
-): Node<undefined> | NodeWithContext<object, never, Context> {
+): Node<undefined> | NodeWithContext<Empty, never, Context> {
   if (context === undefined) {
     return new Node(Block.succeed(undefined));
   } else {
-    return new NodeWithContext(Block.succeed({}), context);
+    return new NodeWithContext(Block.succeed(empty), context);
   }
 }
 
