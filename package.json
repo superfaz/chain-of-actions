@@ -33,19 +33,19 @@
     "test": "vitest",
     "all": "pnpm run lint && pnpm run build && pnpm run test run"
   },
-  "packageManager": "pnpm@9.12.3+sha512.cce0f9de9c5a7c95bef944169cc5dfe8741abfb145078c0d508b868056848a87c81e626246cb60967cbd7fd29a6c062ef73ff840d96b3c86c40ac92cf4a813ee",
+  "packageManager": "pnpm@9.15.0+sha512.76e2379760a4328ec4415815bcd6628dee727af3779aaa4c914e3944156c4299921a89f976381ee107d41f12cfa4b66681ca9c718f0668fa0831ed4c6d8ba56c",
   "dependencies": {
-    "typescript": "^5.6.3"
+    "typescript": "^5.7.2"
   },
   "devDependencies": {
-    "@eslint/js": "^9.15.0",
-    "@vitest/coverage-v8": "^2.1.5",
-    "eslint": "^9.14.0",
+    "@eslint/js": "^9.16.0",
+    "@vitest/coverage-v8": "^2.1.8",
+    "eslint": "^9.16.0",
     "pkgroll": "^2.5.1",
-    "prettier": "^3.3.3",
+    "prettier": "^3.4.2",
     "renamer": "^5.0.2",
     "rimraf": "^6.0.1",
-    "typescript-eslint": "^8.14.0",
-    "vitest": "^2.1.5"
+    "typescript-eslint": "^8.17.0",
+    "vitest": "^2.1.8"
   }
 }
