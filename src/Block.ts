@@ -1,16 +1,33 @@
 import { PromisedResult } from "./Result";
 
+/**
+ * Returns a successful result with the given value.
+ * @param value The value to be wrapped in a successful result.
+ * @returns A successful result with the given value.
+ * @template Value The type of the value.
+ */
 export function succeed<Value>(value: Value): PromisedResult<Value> {
   return Promise.resolve({ success: true, value });
 }
 
-export function fail<Err extends Error>(
-  error: Err,
-): PromisedResult<never, Err> {
+/**
+ * Returns a failed result with the given error.
+ * @param error The error to be wrapped in a failed result.
+ * @returns A failed result with the given error.
+ * @template Err The type of the error.
+ */
+export function fail<Err>(error: Err): PromisedResult<never, Err> {
   return Promise.resolve({ success: false, error });
 }
 
-export async function convert<Value, Err extends Error>(pair: {
+/**
+ * Converts a `Promise` instance into a promised result.
+ * @param pair The pair of try and catch functions.
+ * @returns A promised result.
+ * @template Value The type of the value.
+ * @template Err The type of the error.
+ */
+export async function convert<Value, Err>(pair: {
   try: () => Promise<Value>;
   catch: (e: unknown) => Err | Promise<Err>;
 }): PromisedResult<Value, Err> {
@@ -22,5 +39,3 @@ export async function convert<Value, Err extends Error>(pair: {
     return await fail(result);
   }
 }
-
-export default { succeed, fail, convert };

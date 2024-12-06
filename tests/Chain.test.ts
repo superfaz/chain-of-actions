@@ -1,31 +1,96 @@
 import { describe, expect, test } from "vitest";
-import Chain from "../src/Chain";
+import { onError, onSuccess, start } from "../src/Chain";
 import { Node } from "../src/Node";
 import { PromisedResult } from "../src/Result";
-import { succeed } from "../src/Block";
+import { fail, succeed } from "../src/Block";
+
+class TestError extends Error {
+  constructor(message?: string) {
+    super(message ?? "error");
+  }
+}
 
 describe("Chain", () => {
   describe("start", () => {
     test("()", async () => {
-      const node = Chain.start();
+      const node = start();
       expect(node).toBeInstanceOf(Node);
 
       const actual: PromisedResult<undefined> = node.runAsync();
       const awaited = await actual;
       expect(awaited).toEqual({ success: true });
     });
+  });
 
-    test("(context)", async () => {
-      const initialData = { key: "value" };
-      const context = { user: "testUser" };
+  describe("onSuccess()", () => {
+    const converting = (previous: number) => succeed(previous + 2);
+    test("initial", async () => {
+      const actual = start().add(onSuccess(() => succeed(2)));
+      expect(await actual.runAsync()).toEqual({ success: true, value: 2 });
+    });
 
-      const firstNode = Chain.start(context);
-      const first: PromisedResult<object> = firstNode.runAsync();
-      expect(await first).toEqual({ success: true, value: {} });
+    test("success", async () => {
+      const actual = start()
+        .add(onSuccess(() => succeed(2)))
+        .add(onSuccess(converting));
 
-      const secondNode = firstNode.onSuccess(() => succeed(initialData));
-      const second: PromisedResult<{ key: string }> = secondNode.runAsync();
-      expect(await second).toEqual({ success: true, value: initialData });
+      expect(await actual.runAsync()).toEqual({ success: true, value: 4 });
+    });
+
+    test("fail", async () => {
+      const actual = start()
+        .add(onSuccess(() => fail(new TestError())))
+        .add(onSuccess(converting));
+
+      expect(await actual.runAsync()).toEqual({
+        success: false,
+        error: new TestError("error"),
+      });
+    });
+  });
+
+  describe("onError()", () => {
+    const converting = (error: TestError) =>
+      fail(new TestError(error.message + "2"));
+
+    test("success", async () => {
+      const actual = start()
+        .add(onSuccess(() => succeed(2)))
+        .add((previous) =>
+          previous.success && previous.value > 0
+            ? succeed(previous.value)
+            : fail(new TestError("error")),
+        )
+        .add(onError(converting));
+
+      expect(await actual.runAsync()).toEqual({ success: true, value: 2 });
+    });
+
+    test("fail", async () => {
+      const actual = start()
+        .add(onSuccess(() => fail(new TestError())))
+        .add(onError(converting));
+
+      expect(await actual.runAsync()).toEqual({
+        success: false,
+        error: new TestError("error2"),
+      });
+    });
+
+    test("recover", async () => {
+      const error = (previous: unknown) =>
+        previous ? succeed("ok") : fail(new TestError());
+      const fixing = (error: TestError) => succeed(error.message + "2");
+
+      const actual = start()
+        .add(onSuccess(() => succeed(undefined)))
+        .add(onSuccess(error))
+        .add(onError(fixing));
+
+      expect(await actual.runAsync()).toEqual({
+        success: true,
+        value: "error2",
+      });
     });
   });
 });

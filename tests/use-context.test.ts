@@ -1,5 +1,13 @@
 import { describe, expect, test } from "vitest";
-import { fail, start, succeed } from "../src";
+import {
+  addData,
+  fail,
+  group,
+  onSuccess,
+  onSuccessGroup,
+  start,
+  succeed,
+} from "../src";
 
 class TestError extends Error {
   constructor(message?: string) {
@@ -26,11 +34,12 @@ describe("Usage - Context", () => {
     succeed({ value: value * 2 });
 
   test("Context - Add 2 services and executes 2 data actions", async () => {
-    const actual = start({ ...service1, ...service2 })
-      .onSuccess(() => succeed({ value: 2 }))
-      .onSuccess(addAandB)
-      .onSuccess(addAandB)
-      .onSuccess(multiplyBy2);
+    const actual = start()
+      .withContext({ ...service1, ...service2 })
+      .add(onSuccess(() => succeed({ value: 2 })))
+      .add(group.onSuccess(addAandB))
+      .add(group.onSuccess(addAandB))
+      .add(group.onSuccess(multiplyBy2));
 
     expect(await actual.runAsync()).toEqual({
       success: true,
@@ -42,16 +51,17 @@ describe("Usage - Context", () => {
     const service1 = succeed({ a: 2 });
     const service2 = succeed({ b: 3 });
 
-    const services = await start({})
-      .addData(() => service1)
-      .addData(() => service2)
+    const services = await start()
+      .add(addData(() => service1))
+      .add(addData(() => service2))
       .runAsync();
 
-    const actual = start(services.value)
-      .onSuccess(() => succeed({ value: 2 }))
-      .onSuccess(addAandB)
-      .onSuccess(addAandB)
-      .onSuccess(multiplyBy2);
+    const actual = start()
+      .withContext(services.value)
+      .add(onSuccess(() => succeed({ value: 2 })))
+      .add(onSuccessGroup(addAandB))
+      .add(onSuccessGroup(addAandB))
+      .add(onSuccessGroup(multiplyBy2));
 
     expect(await actual.runAsync()).toEqual({
       success: true,

@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest";
-import { fail, Result, start, succeed } from "../src";
+import { fail, onError, onSuccess, Result, start, succeed } from "../src";
 
 class TestError extends Error {
   constructor(message?: string) {
@@ -19,10 +19,10 @@ describe("Usage - Basic", () => {
         : fail(new TestError("b is negative"));
 
     const actual = start()
-      .onSuccess(() => succeed(data1))
-      .onSuccess((data1) => succeed({ ...data1, ...data2 }))
-      .onSuccess(addAtoB)
-      .onSuccess(multiplyBy2);
+      .add(onSuccess(() => succeed(data1)))
+      .add(onSuccess((data1) => succeed({ ...data1, ...data2 })))
+      .add(onSuccess(addAtoB))
+      .add(onSuccess(multiplyBy2));
 
     expect(await actual.runAsync()).toEqual({ success: true, value: 10 });
   });
@@ -32,11 +32,11 @@ describe("Usage - Basic", () => {
       value > 0 ? succeed(value) : fail(new TestError("negative"));
 
     const actual = start()
-      .onSuccess(() => succeed(-2))
-      .onSuccess(isPositive)
-      .onError(() => succeed(1))
-      .onSuccess(isPositive)
-      .onSuccess(multiplyBy2);
+      .add(onSuccess(() => succeed(-2)))
+      .add(onSuccess(isPositive))
+      .add(onError(() => succeed(1)))
+      .add(onSuccess(isPositive))
+      .add(onSuccess(multiplyBy2));
 
     expect(await actual.runAsync()).toEqual({ success: true, value: 2 });
   });
@@ -55,12 +55,14 @@ describe("Usage - Basic", () => {
     };
 
     const actual: Result<number> = await start()
-      .onSuccess(() => succeed(2))
-      .onSuccess((value) =>
-        value < 2 ? fail(new TestError()) : succeed(value),
+      .add(onSuccess(() => succeed(2)))
+      .add(
+        onSuccess((value) =>
+          value < 2 ? fail(new TestError()) : succeed(value),
+        ),
       )
-      .onError(manageError)
-      .onSuccess((value) => succeed(value * 2))
+      .add(onError(manageError))
+      .add(onSuccess((value) => succeed(value * 2)))
       .runAsync();
 
     expect(actual).toEqual({ success: true, value: 4 });
@@ -72,12 +74,14 @@ describe("Usage - Basic", () => {
     };
 
     const actual = start()
-      .onSuccess(() => succeed(1))
-      .onSuccess((value) =>
-        value < 2 ? fail(new TestError()) : succeed(value),
+      .add(onSuccess(() => succeed(1)))
+      .add(
+        onSuccess((value) =>
+          value < 2 ? fail(new TestError()) : succeed(value),
+        ),
       )
-      .onError(manageError)
-      .onSuccess((value) => succeed(value * 2))
+      .add(onError(manageError))
+      .add(onSuccess((value) => succeed(value * 2)))
       .runAsync();
 
     await expect(actual).rejects.toThrow(new Error("error"));

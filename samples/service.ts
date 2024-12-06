@@ -2,7 +2,15 @@
  * Demonstrate how to use chain-of-actions to prepare services and execute actions.
  */
 
-import { fail, prepare, PromisedResult, start, succeed } from "../src";
+import {
+  addData,
+  fail,
+  group,
+  onSuccess,
+  PromisedResult,
+  start,
+  succeed,
+} from "../src";
 
 /**
  * Mocks process.env for the sample.
@@ -86,27 +94,35 @@ function loadConfiguration(): PromisedResult<
   Configuration,
   ConfigurationMissingError
 > {
-  const config = prepare().addData(() =>
-    process.env.DATABASE_URL
-      ? succeed({ databaseUrl: process.env.DATABASE_URL })
-      : fail(new ConfigurationMissingError("DATABASE_URL")),
-  );
+  const config = start()
+    .add(() => succeed({}))
+    .add(
+      addData(() =>
+        process.env.DATABASE_URL
+          ? succeed({ databaseUrl: process.env.DATABASE_URL })
+          : fail(new ConfigurationMissingError("DATABASE_URL")),
+      ),
+    );
 
-  return config.runAsync(undefined, {});
+  return config.runAsync();
 }
 
 /**
  * Creates the context from the configuration.
  */
 function createContext(configuration: Configuration): PromisedResult<Context> {
-  const context = prepare<undefined, Configuration>().addData(
-    (_, configuration) =>
-      succeed({
-        database: new DatabaseClient(configuration.databaseUrl),
-      }),
-  );
+  const context = start()
+    .withContext({ configuration })
+    .add(() => succeed({}))
+    .add(
+      group.addData(({ configuration }) =>
+        succeed({
+          database: new DatabaseClient(configuration.databaseUrl),
+        }),
+      ),
+    );
 
-  return context.runAsync(undefined, configuration);
+  return context.runAsync();
 }
 
 /**
@@ -125,9 +141,10 @@ export async function apiLike() {
     return new HttpResponse(500);
   }
 
-  const user = await start(context.value)
-    .onSuccess(() => succeed({ id: "alice" }))
-    .onSuccess(({ id, database }) => database.getUser(id))
+  const user = await start()
+    .withContext(context.value)
+    .add(onSuccess(() => succeed({ id: "alice" })))
+    .add(group.onSuccess(({ id, database }) => database.getUser(id)))
     .runAsync();
 
   if (!user.success) {

@@ -10,7 +10,7 @@ Typescript error management is based on the `try`/`catch` statements and this ap
 try {
   const user = await getUser("id");
 } catch (error: unknown) {
-  // error can be here of any type
+  // error can be of any type
 }
 ```
 
@@ -70,11 +70,9 @@ async function getUser(
 | `succeed()` | Create a successful response |
 | `fail()`    | Create a failed response     |
 
-To implement this method, we can use a few helpers, namely `start`, `convert`, `succeed` and `fail` :
-
 ## Chain of Actions
 
-Knowning if an action failed or not allows to chain actions based on their statuses. For this, this library provides a `start` function to create a chain of actions.
+Knowning if an action failed or not allows to chain actions based on their statuses and create a railway. For this, this library provides a `start` function to create a chain of actions.
 
 ```typescript
 async function getUser(
