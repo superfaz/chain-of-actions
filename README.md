@@ -85,18 +85,20 @@ async function getUser(
         catch: (e) => new DatabaseError(e),
       }),
     )
-    .onSuccess((user) =>
-      user ? succeed(user) : fail(new MissingDataError("User", id)),
+    .add(
+      onSuccess((user) =>
+        user ? succeed(user) : fail(new MissingDataError("User", id)),
+      ),
     );
 }
 ```
 
-| Helpers              | Explanation                                                               |
-| -------------------- | ------------------------------------------------------------------------- |
-| `start()`            | starts a chain of actions with a specific data                            |
-| `.add(action)`       | adds a new node to the chain                                              |
-| `.onSuccess(action)` | adds a new node that will execute its action if the previous node succeed |
-| `convert(fct, err)`  | Convert a standard `Promise` call to a `PromisedResult`                   |
+| Helpers             | Explanation                                                               |
+| ------------------- | ------------------------------------------------------------------------- |
+| `start()`           | starts a chain of actions with a specific data                            |
+| `.add(action)`      | adds a new node to the chain                                              |
+| `onSuccess(action)` | adds a new node that will execute its action if the previous node succeed |
+| `convert(fct, err)` | Convert a standard `Promise` call to a `PromisedResult`                   |
 
 > [!NOTE]
 > This example can still be improved: the current implementation uses a `database` object : Where is it initialized? How are the error managed for it?
