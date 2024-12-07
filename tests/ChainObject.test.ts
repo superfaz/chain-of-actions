@@ -1,6 +1,10 @@
 import { describe, expect, test } from "vitest";
 import { onError, onSuccess, start } from "../src/Chain";
-import { addData, onSuccessGroup } from "../src/ChainObject";
+import {
+  addDataGroup,
+  onSuccessGroup,
+  passThroughGroup,
+} from "../src/ChainObject";
 import { fail, succeed } from "../src/Block";
 
 class TestError extends Error {
@@ -38,6 +42,46 @@ describe("ChainObject", () => {
         .add(onSuccess(() => initial))
         .withContext(context)
         .add(onSuccessGroup(addingContext));
+
+      expect(await actual.runAsync()).toEqual({
+        success: false,
+        error: new TestError("error"),
+      });
+    });
+  });
+
+  describe("passThroughGroup()", () => {
+    const converting = ({ value, a }: { value: number; a: number }) => {
+      if (value + a === 4) {
+        console.log("converting");
+      } else {
+        return fail(new TestError());
+      }
+    };
+
+    test("success", async () => {
+      const initial = succeed({ value: 2 });
+      const context = { a: 2 };
+
+      const actual = start()
+        .add(onSuccess(() => initial))
+        .withContext(context)
+        .add(passThroughGroup(converting));
+
+      expect(await actual.runAsync()).toEqual({
+        success: true,
+        value: { value: 2 },
+      });
+    });
+
+    test("fail", async () => {
+      const initial = fail(new TestError());
+      const context = { a: 2 };
+
+      const actual = start()
+        .add(onSuccess(() => initial))
+        .withContext(context)
+        .add(passThroughGroup(converting));
 
       expect(await actual.runAsync()).toEqual({
         success: false,
@@ -102,32 +146,33 @@ describe("ChainObject", () => {
     });
   });
 
-  describe("addData()", () => {
+  describe("addDataGroup()", () => {
+    const extra = ({ current, a }: { current: number; a: number }) =>
+      succeed({ extra: 3 + current + a });
+
     test("success", async () => {
       const initial = succeed({ current: 2 });
       const context = { a: 2 };
-      const extra = () => succeed({ extra: 3 });
 
       const actual = start()
         .add(onSuccess(() => initial))
         .withContext(context)
-        .add(addData(extra));
+        .add(addDataGroup(extra));
 
       expect(await actual.runAsync()).toEqual({
         success: true,
-        value: { extra: 3, current: 2 },
+        value: { extra: 7, current: 2 },
       });
     });
 
     test("fail", async () => {
       const initial = fail(new TestError());
       const context = { a: 2 };
-      const extra = () => succeed({ extra: 3 });
 
       const actual = start()
         .add(onSuccess(() => initial))
         .withContext(context)
-        .add(addData(extra));
+        .add(addDataGroup(extra));
 
       expect(await actual.runAsync()).toEqual({
         success: false,
@@ -138,16 +183,17 @@ describe("ChainObject", () => {
     test("failing data", async () => {
       const initial = succeed({ current: 2 });
       const context = { a: 2 };
-      const extra = () => fail(new TestError("data error"));
+      const extra = ({ current, a }: { current: number; a: number }) =>
+        fail(new TestError("data error " + (current + a).toString()));
 
       const actual = start()
         .add(onSuccess(() => initial))
         .withContext(context)
-        .add(addData(extra));
+        .add(addDataGroup(extra));
 
       expect(await actual.runAsync()).toEqual({
         success: false,
-        error: new TestError("data error"),
+        error: new TestError("data error 4"),
       });
     });
   });

@@ -51,4 +51,48 @@ describe("Node", () => {
       });
     });
   });
+
+  describe("withContext()", () => {
+    test("success", async () => {
+      const start = succeed(2);
+      const actual: Node<number, never, { key: string }> = new Node(
+        start,
+        undefined,
+      ).withContext({ key: "value" });
+      expect(await actual.runAsync()).toEqual({ success: true, value: 2 });
+    });
+
+    test("fail", async () => {
+      const start = fail(new TestError());
+      const actual: Node<never, TestError, { key: string }> = new Node(
+        start,
+        undefined,
+      ).withContext({ key: "value" });
+      expect(await actual.runAsync()).toEqual({
+        success: false,
+        error: new TestError("error"),
+      });
+    });
+  });
+
+  describe("removeContext()", () => {
+    test("success", async () => {
+      const start = succeed(2);
+      const actual: Node<number> = new Node(start, {
+        key: "value",
+      }).removeContext();
+      expect(await actual.runAsync()).toEqual({ success: true, value: 2 });
+    });
+
+    test("fail", async () => {
+      const start = fail(new TestError());
+      const actual: Node<never, TestError> = new Node(start, {
+        key: "value",
+      }).removeContext();
+      expect(await actual.runAsync()).toEqual({
+        success: false,
+        error: new TestError("error"),
+      });
+    });
+  });
 });

@@ -58,9 +58,11 @@ export function passThroughGroup<
 >(
   passThroughAction: (
     input: Input & Context,
-  ) => PromisedResult<void, OutputErr>,
+  ) => undefined | PromisedResult<never, OutputErr>,
 ): Action<Input, InputErr, Input, InputErr | OutputErr, Context> {
-  return passThrough(group(passThroughAction));
+  return passThrough((previous, context) =>
+    passThroughAction({ ...previous, ...context }),
+  );
 }
 
 export function addDataGroup<

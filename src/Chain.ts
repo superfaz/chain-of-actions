@@ -19,12 +19,15 @@ export function onSuccess<Input, InputErr, Output, OutputErr, Context>(
 }
 
 export function passThrough<Input, InputErr, OutputErr, Context>(
-  passThroughAction: ValueAction<Input, void, OutputErr, Context>,
+  passThroughAction: (
+    input: Input,
+    context: Context,
+  ) => undefined | PromisedResult<never, OutputErr>,
 ): Action<Input, InputErr, Input, InputErr | OutputErr, Context> {
   return async (previous, context) => {
     if (previous.success) {
       const result = await passThroughAction(previous.value, context);
-      if (result.success) {
+      if (result === undefined || result.success) {
         return succeed(previous.value);
       }
       return fail(result.error);

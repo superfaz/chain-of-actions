@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest";
-import { onError, onSuccess, start } from "../src/Chain";
+import { onError, onSuccess, passThrough, start } from "../src/Chain";
 import { Node } from "../src/Node";
 import { PromisedResult } from "../src/Result";
 import { fail, succeed } from "../src/Block";
@@ -41,6 +41,46 @@ describe("Chain", () => {
       const actual = start()
         .add(onSuccess(() => fail(new TestError())))
         .add(onSuccess(converting));
+
+      expect(await actual.runAsync()).toEqual({
+        success: false,
+        error: new TestError("error"),
+      });
+    });
+  });
+
+  describe("pathThrough()", () => {
+    const converting = (input: unknown) => {
+      if (input) {
+        console.log("converting");
+      } else {
+        return fail(new TestError());
+      }
+    };
+
+    test("success", async () => {
+      const actual = start()
+        .add(onSuccess(() => succeed(2)))
+        .add(passThrough(converting));
+
+      expect(await actual.runAsync()).toEqual({ success: true, value: 2 });
+    });
+
+    test("fail", async () => {
+      const actual = start()
+        .add(onSuccess(() => succeed(undefined)))
+        .add(passThrough(converting));
+
+      expect(await actual.runAsync()).toEqual({
+        success: false,
+        error: new TestError("error"),
+      });
+    });
+
+    test("skipped", async () => {
+      const actual = start()
+        .add(onSuccess(() => fail(new TestError())))
+        .add(passThrough(converting));
 
       expect(await actual.runAsync()).toEqual({
         success: false,
