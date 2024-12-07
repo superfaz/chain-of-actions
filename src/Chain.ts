@@ -40,7 +40,20 @@ export function onError<Input, InputErr, OutputErr, Context>(
   failureAction: (
     error: InputErr,
     context: Context,
-  ) => PromisedResult<never, OutputErr> | PromisedResult<Input, OutputErr>,
+  ) => PromisedResult<never, OutputErr>,
+): Action<Input, InputErr, Input, OutputErr, Context>;
+export function onError<Input, InputErr, OutputErr, Context>(
+  // eslint-disable-next-line @typescript-eslint/unified-signatures
+  failureAction: (
+    error: InputErr,
+    context: Context,
+  ) => PromisedResult<Input, OutputErr>,
+): Action<Input, InputErr, Input, OutputErr, Context>;
+export function onError<Input, InputErr, OutputErr, Context>(
+  failureAction: (
+    error: InputErr,
+    context: Context,
+  ) => PromisedResult<Input, OutputErr>,
 ): Action<Input, InputErr, Input, OutputErr, Context> {
   return (previous, context) => {
     if (previous.success) {

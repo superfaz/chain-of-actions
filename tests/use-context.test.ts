@@ -2,9 +2,9 @@ import { describe, expect, test } from "vitest";
 import {
   addData,
   fail,
-  group,
+  grouped,
   onSuccess,
-  onSuccessGroup,
+  onSuccessGrouped,
   start,
   succeed,
 } from "../src";
@@ -37,9 +37,9 @@ describe("Usage - Context", () => {
     const actual = start()
       .withContext({ ...service1, ...service2 })
       .add(onSuccess(() => succeed({ value: 2 })))
-      .add(group.onSuccess(addAandB))
-      .add(group.onSuccess(addAandB))
-      .add(group.onSuccess(multiplyBy2));
+      .add(grouped.onSuccess(addAandB))
+      .add(grouped.onSuccess(addAandB))
+      .add(grouped.onSuccess(multiplyBy2));
 
     expect(await actual.runAsync()).toEqual({
       success: true,
@@ -52,6 +52,7 @@ describe("Usage - Context", () => {
     const service2 = succeed({ b: 3 });
 
     const services = await start()
+      .add(() => succeed({}))
       .add(addData(() => service1))
       .add(addData(() => service2))
       .runAsync();
@@ -59,9 +60,9 @@ describe("Usage - Context", () => {
     const actual = start()
       .withContext(services.value)
       .add(onSuccess(() => succeed({ value: 2 })))
-      .add(onSuccessGroup(addAandB))
-      .add(onSuccessGroup(addAandB))
-      .add(onSuccessGroup(multiplyBy2));
+      .add(onSuccessGrouped(addAandB))
+      .add(onSuccessGrouped(addAandB))
+      .add(onSuccessGrouped(multiplyBy2));
 
     expect(await actual.runAsync()).toEqual({
       success: true,

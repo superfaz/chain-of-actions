@@ -1,9 +1,9 @@
 import { describe, expect, test } from "vitest";
 import { onError, onSuccess, start } from "../src/Chain";
 import {
-  addDataGroup,
-  onSuccessGroup,
-  passThroughGroup,
+  addDataGrouped,
+  onSuccessGrouped,
+  passThroughGrouped,
 } from "../src/ChainObject";
 import { fail, succeed } from "../src/Block";
 
@@ -14,7 +14,7 @@ class TestError extends Error {
 }
 
 describe("ChainObject", () => {
-  describe("onSuccessGroup()", () => {
+  describe(onSuccessGrouped.name, () => {
     test("success", async () => {
       const initial = succeed({ value: 2 });
       const context = { a: 2 };
@@ -24,7 +24,7 @@ describe("ChainObject", () => {
       const actual = start()
         .add(onSuccess(() => initial))
         .withContext(context)
-        .add(onSuccessGroup(addingContext));
+        .add(onSuccessGrouped(addingContext));
 
       expect(await actual.runAsync()).toEqual({
         success: true,
@@ -41,7 +41,7 @@ describe("ChainObject", () => {
       const actual = start()
         .add(onSuccess(() => initial))
         .withContext(context)
-        .add(onSuccessGroup(addingContext));
+        .add(onSuccessGrouped(addingContext));
 
       expect(await actual.runAsync()).toEqual({
         success: false,
@@ -50,7 +50,7 @@ describe("ChainObject", () => {
     });
   });
 
-  describe("passThroughGroup()", () => {
+  describe(passThroughGrouped.name, () => {
     const converting = ({ value, a }: { value: number; a: number }) => {
       if (value + a === 4) {
         console.log("converting");
@@ -66,7 +66,7 @@ describe("ChainObject", () => {
       const actual = start()
         .add(onSuccess(() => initial))
         .withContext(context)
-        .add(passThroughGroup(converting));
+        .add(passThroughGrouped(converting));
 
       expect(await actual.runAsync()).toEqual({
         success: true,
@@ -81,7 +81,7 @@ describe("ChainObject", () => {
       const actual = start()
         .add(onSuccess(() => initial))
         .withContext(context)
-        .add(passThroughGroup(converting));
+        .add(passThroughGrouped(converting));
 
       expect(await actual.runAsync()).toEqual({
         success: false,
@@ -90,7 +90,7 @@ describe("ChainObject", () => {
     });
   });
 
-  describe("onError()", () => {
+  describe(onError.name, () => {
     test("success", async () => {
       const initial = succeed({ value: 2 });
       const context = { a: 2 };
@@ -146,7 +146,7 @@ describe("ChainObject", () => {
     });
   });
 
-  describe("addDataGroup()", () => {
+  describe(addDataGrouped.name, () => {
     const extra = ({ current, a }: { current: number; a: number }) =>
       succeed({ extra: 3 + current + a });
 
@@ -157,7 +157,7 @@ describe("ChainObject", () => {
       const actual = start()
         .add(onSuccess(() => initial))
         .withContext(context)
-        .add(addDataGroup(extra));
+        .add(addDataGrouped(extra));
 
       expect(await actual.runAsync()).toEqual({
         success: true,
@@ -172,7 +172,7 @@ describe("ChainObject", () => {
       const actual = start()
         .add(onSuccess(() => initial))
         .withContext(context)
-        .add(addDataGroup(extra));
+        .add(addDataGrouped(extra));
 
       expect(await actual.runAsync()).toEqual({
         success: false,
@@ -189,7 +189,7 @@ describe("ChainObject", () => {
       const actual = start()
         .add(onSuccess(() => initial))
         .withContext(context)
-        .add(addDataGroup(extra));
+        .add(addDataGrouped(extra));
 
       expect(await actual.runAsync()).toEqual({
         success: false,

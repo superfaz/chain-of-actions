@@ -24,7 +24,7 @@ export function addData<
   };
 }
 
-export function group<
+export function grouped<
   Input extends object,
   InputErr,
   Output,
@@ -38,7 +38,7 @@ export function group<
   };
 }
 
-export function onSuccessGroup<
+export function onSuccessGrouped<
   Input extends object,
   InputErr,
   Output,
@@ -47,10 +47,10 @@ export function onSuccessGroup<
 >(
   successAction: (input: Input & Context) => PromisedResult<Output, OutputErr>,
 ): Action<Input, InputErr, Output, InputErr | OutputErr, Context> {
-  return onSuccess(group(successAction));
+  return onSuccess(grouped(successAction));
 }
 
-export function passThroughGroup<
+export function passThroughGrouped<
   Input extends object,
   InputErr,
   OutputErr,
@@ -65,7 +65,7 @@ export function passThroughGroup<
   );
 }
 
-export function addDataGroup<
+export function addDataGrouped<
   Input extends object,
   InputErr,
   Data extends object,
@@ -74,9 +74,9 @@ export function addDataGroup<
 >(
   dataAction: (input: Input & Context) => PromisedResult<Data, OutputErr>,
 ): Action<Input, InputErr, Input & Data, InputErr | OutputErr, Context> {
-  return addData(group(dataAction));
+  return addData(grouped(dataAction));
 }
 
-group.onSuccess = onSuccessGroup;
-group.passThrough = passThroughGroup;
-group.addData = addDataGroup;
+grouped.onSuccess = onSuccessGrouped;
+grouped.passThrough = passThroughGrouped;
+grouped.addData = addDataGrouped;

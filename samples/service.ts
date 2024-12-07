@@ -5,7 +5,7 @@
 import {
   addData,
   fail,
-  group,
+  grouped,
   onSuccess,
   PromisedResult,
   start,
@@ -115,7 +115,7 @@ function createContext(configuration: Configuration): PromisedResult<Context> {
     .withContext({ configuration })
     .add(() => succeed({}))
     .add(
-      group.addData(({ configuration }) =>
+      grouped.addData(({ configuration }) =>
         succeed({
           database: new DatabaseClient(configuration.databaseUrl),
         }),
@@ -144,7 +144,7 @@ export async function apiLike() {
   const user = await start()
     .withContext(context.value)
     .add(onSuccess(() => succeed({ id: "alice" })))
-    .add(group.onSuccess(({ id, database }) => database.getUser(id)))
+    .add(grouped.onSuccess(({ id, database }) => database.getUser(id)))
     .runAsync();
 
   if (!user.success) {
