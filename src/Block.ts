@@ -6,8 +6,16 @@ import { PromisedResult } from "./Result";
  * @returns A successful result with the given value.
  * @template Value The type of the value.
  */
-export function succeed<Value>(value: Value): PromisedResult<Value> {
-  return Promise.resolve({ success: true, value });
+export function succeed(): PromisedResult<undefined>;
+export function succeed<Value>(value: Value): PromisedResult<Value>;
+export function succeed<Value>(
+  value?: Value,
+): PromisedResult<Value | undefined> {
+  if (value === undefined) {
+    return Promise.resolve({ success: true, value: undefined });
+  } else {
+    return Promise.resolve({ success: true, value });
+  }
 }
 
 /**
