@@ -1,3 +1,5 @@
+[![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/superfaz/chain-of-actions/badge)](https://scorecard.dev/viewer/?uri=github.com/superfaz/chain-of-actions)
+
 ## Objective
 
 This project aims to provide a typed error management for typescript code.
