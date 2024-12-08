@@ -41,12 +41,35 @@ describe("Usage - Basic", () => {
     expect(await actual.runAsync()).toEqual({ success: true, value: 2 });
   });
 
-  test("Manage error", async () => {
+  test("Manage errors", async () => {
+    const isPositive = (value: number) =>
+      value > 0 ? succeed(value) : fail(new TestError("negative"));
+
     const actual = await start()
-      .add(() => fail(new Error("error")))
+      .add(onSuccess(() => succeed(-2)))
+      .add(onSuccess(isPositive))
+      .add(onSuccess(multiplyBy2))
       .runAsync();
 
-    expect(actual).toEqual({ success: false, error: new Error("error") });
+    expect(actual).toEqual({ success: false, error: new Error("negative") });
+  });
+
+  test("Manage errors via kill methods", async () => {
+    const isPositive = (value: number) =>
+      value > 0 ? succeed(value) : fail(new TestError("negative"));
+
+    const actual: Result<number> = await start()
+      .add(onSuccess(() => succeed(2)))
+      .add(onSuccess(isPositive))
+      .add(onSuccess(multiplyBy2))
+      .add(
+        onError((error) => {
+          throw error;
+        }),
+      )
+      .runAsync();
+
+    expect(actual).toEqual({ success: true, value: 4 });
   });
 
   test("Use onError to catch and manage errors during process (success)", async () => {
