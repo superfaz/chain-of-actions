@@ -50,9 +50,12 @@ describe("Chain", () => {
   });
 
   describe("pathThrough()", () => {
-    const converting = (input: unknown) => {
+    const converting = (
+      input: unknown,
+    ): PromisedResult<undefined, TestError> => {
       if (input) {
         console.log("converting");
+        return succeed();
       } else {
         return fail(new TestError());
       }

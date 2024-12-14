@@ -22,7 +22,10 @@ export function passThrough<Input, InputErr, OutputErr, Context>(
   passThroughAction: (
     input: Input,
     context: Context,
-  ) => undefined | PromisedResult<never, OutputErr>,
+  ) =>
+    | undefined
+    | PromisedResult<undefined, OutputErr>
+    | PromisedResult<never, OutputErr>,
 ): Action<Input, InputErr, Input, InputErr | OutputErr, Context> {
   return async (previous, context) => {
     if (previous.success) {
