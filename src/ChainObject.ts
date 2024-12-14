@@ -4,13 +4,14 @@ import { onSuccess, passThrough } from "./Chain";
 import { PromisedResult } from "./Result";
 
 export function addData<
-  Input extends object,
+  Input extends DataInput,
   InputErr,
+  DataInput extends object,
   Data extends object,
   OutputErr,
   Context,
 >(
-  dataAction: ValueAction<Input, Data, OutputErr, Context>,
+  dataAction: ValueAction<DataInput, Data, OutputErr, Context>,
 ): Action<Input, InputErr, Input & Data, InputErr | OutputErr, Context> {
   return async (previous, context) => {
     if (previous.success) {
@@ -74,7 +75,8 @@ export function addDataGrouped<
 >(
   dataAction: (input: Input & Context) => PromisedResult<Data, OutputErr>,
 ): Action<Input, InputErr, Input & Data, InputErr | OutputErr, Context> {
-  return addData(grouped(dataAction));
+  const group = grouped<Input, InputErr, Data, OutputErr, Context>(dataAction);
+  return addData(group);
 }
 
 grouped.onSuccess = onSuccessGrouped;

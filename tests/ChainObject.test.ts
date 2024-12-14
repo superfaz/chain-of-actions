@@ -1,6 +1,7 @@
 import { describe, expect, test } from "vitest";
 import { onError, onSuccess, start } from "../src/Chain";
 import {
+  addData,
   addDataGrouped,
   onSuccessGrouped,
   passThroughGrouped,
@@ -146,6 +147,42 @@ describe("ChainObject", () => {
     });
   });
 
+  describe(addData.name, () => {
+    test("success", async () => {
+      const initial = succeed({ current: 2 });
+      const actual = start()
+        .add(onSuccess(() => initial))
+        .add(addData(() => succeed({ extra1: 3 })))
+        .add(addData(() => succeed({ extra2: 4 })));
+
+      expect(await actual.runAsync()).toEqual({
+        success: true,
+        value: { current: 2, extra1: 3, extra2: 4 },
+      });
+    });
+
+    test("with typed method", async () => {
+      const initial = succeed({ current: 2 });
+      const typed = ({ extra1 }: { extra1: number }) =>
+        succeed({ extra4: extra1 + 4 });
+      const actual = await start()
+        .add(onSuccess(() => initial))
+        .add(addData(() => succeed({ extra1: 3 })))
+        .add(addData(() => succeed({ extra2: 4 })))
+        .add(addData(() => succeed({ extra3: 5 })))
+        .add(addData(typed))
+        .runAsync();
+
+      expect(actual.value.extra2).toEqual(4);
+      expect(actual.value.extra3).toEqual(5);
+
+      expect(actual).toEqual({
+        success: true,
+        value: { current: 2, extra1: 3, extra2: 4, extra3: 5, extra4: 7 },
+      });
+    });
+  });
+
   describe(addDataGrouped.name, () => {
     const extra = ({ current, a }: { current: number; a: number }) =>
       succeed({ extra: 3 + current + a });
@@ -170,8 +207,8 @@ describe("ChainObject", () => {
       const context = { a: 2 };
 
       const actual = start()
-        .add(onSuccess(() => initial))
         .withContext(context)
+        .add(onSuccess(() => initial))
         .add(addDataGrouped(extra));
 
       expect(await actual.runAsync()).toEqual({
@@ -187,13 +224,36 @@ describe("ChainObject", () => {
         fail(new TestError("data error " + (current + a).toString()));
 
       const actual = start()
-        .add(onSuccess(() => initial))
         .withContext(context)
+        .add(onSuccess(() => initial))
         .add(addDataGrouped(extra));
 
       expect(await actual.runAsync()).toEqual({
         success: false,
         error: new TestError("data error 4"),
+      });
+    });
+
+    test("with typed method", async () => {
+      const initial = succeed({ current: 2 });
+      const context = { a: 2 };
+      const typed = ({ extra1, a }: { extra1: number; a: number }) =>
+        succeed({ extra4: extra1 + a + 4 });
+      const actual = await start()
+        .withContext(context)
+        .add(onSuccess(() => initial))
+        .add(addDataGrouped(() => succeed({ extra1: 3 })))
+        .add(addDataGrouped(() => succeed({ extra2: 4 })))
+        .add(addDataGrouped(() => succeed({ extra3: 5 })))
+        .add(addDataGrouped(typed))
+        .runAsync();
+
+      expect(actual.value.extra2).toEqual(4);
+      expect(actual.value.extra3).toEqual(5);
+
+      expect(actual).toEqual({
+        success: true,
+        value: { current: 2, extra1: 3, extra2: 4, extra3: 5, extra4: 9 },
       });
     });
   });
