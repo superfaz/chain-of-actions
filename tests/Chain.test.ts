@@ -1,7 +1,7 @@
 import { describe, expect, test } from "vitest";
 import { onError, onSuccess, passThrough, start } from "../src/Chain";
 import { Node } from "../src/Node";
-import { PromisedResult } from "../src/Result";
+import { PromisedResult, SuccessResult } from "../src/Result";
 import { fail, succeed } from "../src/Block";
 
 class TestError extends Error {
@@ -133,6 +133,30 @@ describe("Chain", () => {
       expect(await actual.runAsync()).toEqual({
         success: true,
         value: "error2",
+      });
+    });
+
+    test("works with never", async () => {
+      const error = (previous: unknown) =>
+        previous ? succeed("ok") : fail(new TestError());
+      const errorManagment = (error: TestError) => {
+        throw error;
+      };
+
+      const actual = start()
+        .add(onSuccess(() => succeed(2)))
+        .add(onSuccess(error))
+        .add(onError(errorManagment));
+
+      // Will generate a type error if onError doesn't manage properly its type
+      type Typecheck<T> =
+        T extends Promise<SuccessResult<string>> ? true : false;
+      const typecheck: Typecheck<ReturnType<typeof actual.runAsync>> = true;
+      expect(typecheck).toBe(true);
+
+      expect(await actual.runAsync()).toEqual({
+        success: true,
+        value: "ok",
       });
     });
   });

@@ -41,7 +41,7 @@ export function passThrough<Input, InputErr, OutputErr, Context>(
 
 export function onError<Input, InputErr, Context>(
   failureAction: (error: InputErr, context: Context) => never,
-): Action<Input, InputErr, never, never, Context>;
+): Action<Input, InputErr, Input, never, Context>;
 export function onError<Input, InputErr, OutputErr, Context>(
   failureAction: (
     error: InputErr,
