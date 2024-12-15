@@ -1,8 +1,8 @@
 import { describe, expect, test } from "vitest";
+import { fail, succeed } from "../src/Block";
 import { onError, onSuccess, passThrough, start } from "../src/Chain";
 import { Node } from "../src/Node";
 import { PromisedResult, SuccessResult } from "../src/Result";
-import { fail, succeed } from "../src/Block";
 
 class TestError extends Error {
   constructor(message?: string) {
@@ -11,18 +11,16 @@ class TestError extends Error {
 }
 
 describe("Chain", () => {
-  describe("start", () => {
-    test("()", async () => {
-      const node = start();
-      expect(node).toBeInstanceOf(Node);
+  test(start.name, async () => {
+    const node = start();
+    expect(node).toBeInstanceOf(Node);
 
-      const actual: PromisedResult<undefined> = node.runAsync();
-      const awaited = await actual;
-      expect(awaited).toEqual({ success: true });
-    });
+    const actual: PromisedResult<undefined> = node.runAsync();
+    const awaited = await actual;
+    expect(awaited).toEqual({ success: true });
   });
 
-  describe("onSuccess()", () => {
+  describe(onSuccess.name, () => {
     const converting = (previous: number) => succeed(previous + 2);
     test("initial", async () => {
       const actual = start().add(onSuccess(() => succeed(2)));
@@ -49,7 +47,7 @@ describe("Chain", () => {
     });
   });
 
-  describe("pathThrough()", () => {
+  describe(passThrough.name, () => {
     const converting = (
       input: unknown,
     ): PromisedResult<undefined, TestError> => {
@@ -92,7 +90,7 @@ describe("Chain", () => {
     });
   });
 
-  describe("onError()", () => {
+  describe(onError.name, () => {
     const converting = (error: TestError) =>
       fail(new TestError(error.message + "2"));
 
