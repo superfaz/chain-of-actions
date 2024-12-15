@@ -26,7 +26,7 @@ export function addData<
 }
 
 export function grouped<
-  Input extends object,
+  Input extends object | undefined,
   InputErr,
   Output,
   OutputErr,
@@ -40,7 +40,7 @@ export function grouped<
 }
 
 export function onSuccessGrouped<
-  Input extends object,
+  Input extends object | undefined,
   InputErr,
   Output,
   OutputErr,
@@ -52,7 +52,7 @@ export function onSuccessGrouped<
 }
 
 export function passThroughGrouped<
-  Input extends object,
+  Input extends object | undefined,
   InputErr,
   OutputErr,
   Context extends object,

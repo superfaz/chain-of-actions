@@ -49,6 +49,21 @@ describe("ChainObject", () => {
         error: new TestError("error"),
       });
     });
+
+    test("working with undefined data", async () => {
+      const context = { a: 2 };
+      const action = ({ a }: { a: number }) => succeed({ result: a });
+
+      const actual = await start()
+        .withContext(context)
+        .add(onSuccessGrouped(action))
+        .runAsync();
+
+      expect(actual).toEqual({
+        success: true,
+        value: { result: 2 },
+      });
+    });
   });
 
   describe(passThroughGrouped.name, () => {
@@ -87,6 +102,27 @@ describe("ChainObject", () => {
       expect(await actual.runAsync()).toEqual({
         success: false,
         error: new TestError("error"),
+      });
+    });
+
+    test("working with undefined data", async () => {
+      const context = { a: 4 };
+      const action = ({ a }: { a: number }) => {
+        if (a === 4) {
+          console.log("converting");
+        } else {
+          return fail(new TestError());
+        }
+      };
+
+      const actual = await start()
+        .withContext(context)
+        .add(passThroughGrouped(action))
+        .runAsync();
+
+      expect(actual).toEqual({
+        success: true,
+        value: undefined,
       });
     });
   });
