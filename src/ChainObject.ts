@@ -35,7 +35,7 @@ export function grouped<
   groupedAction: (input: Input & Context) => PromisedResult<Output, OutputErr>,
 ): ValueAction<Input, Output, InputErr | OutputErr, Context> {
   return (previous, context) => {
-    return groupedAction({ ...previous, ...context });
+    return groupedAction({ ...context, ...previous });
   };
 }
 
@@ -62,7 +62,7 @@ export function passThroughGrouped<
   ) => undefined | PromisedResult<never, OutputErr>,
 ): Action<Input, InputErr, Input, InputErr | OutputErr, Context> {
   return passThrough((previous, context) =>
-    passThroughAction({ ...previous, ...context }),
+    passThroughAction({ ...context, ...previous }),
   );
 }
 
